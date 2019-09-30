@@ -1,0 +1,4 @@
+rm -rf riscv64.vvp
+iverilog -g2012 -o riscv64.vvp -c riscv64.iv -s riscv_pu \
+-I riscv64/pkg
+vvp riscv64.vvp

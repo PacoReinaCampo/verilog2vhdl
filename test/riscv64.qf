@@ -1,0 +1,46 @@
+rm -rf synthesis
+mkdir synthesis
+mkdir synthesis/riscv64
+mkdir synthesis/riscv64/source
+mkdir synthesis/riscv64/synthesis
+mkdir synthesis/riscv64/layout
+
+cp riscv64/core/cache/riscv_dcache_core.sv    synthesis/riscv64/source
+cp riscv64/core/cache/riscv_dext.sv           synthesis/riscv64/source
+cp riscv64/core/cache/riscv_icache_core.sv    synthesis/riscv64/source
+cp riscv64/core/cache/riscv_noicache_core.sv  synthesis/riscv64/source
+cp riscv64/core/execution/riscv_alu.sv        synthesis/riscv64/source
+cp riscv64/core/execution/riscv_bu.sv         synthesis/riscv64/source
+cp riscv64/core/execution/riscv_div.sv        synthesis/riscv64/source
+cp riscv64/core/execution/riscv_lsu.sv        synthesis/riscv64/source
+cp riscv64/core/execution/riscv_mul.sv        synthesis/riscv64/source
+cp riscv64/core/memory/riscv_dmem_ctrl.sv     synthesis/riscv64/source
+cp riscv64/core/memory/riscv_imem_ctrl.sv     synthesis/riscv64/source
+cp riscv64/core/memory/riscv_membuf.sv        synthesis/riscv64/source
+cp riscv64/core/memory/riscv_memmisaligned.sv synthesis/riscv64/source
+cp riscv64/core/memory/riscv_mmu.sv           synthesis/riscv64/source
+cp riscv64/core/memory/riscv_mux.sv           synthesis/riscv64/source
+cp riscv64/core/memory/riscv_pmachk.sv        synthesis/riscv64/source
+cp riscv64/core/memory/riscv_pmpchk.sv        synthesis/riscv64/source
+cp riscv64/pkg/riscv_pu_pkg.sv                synthesis/riscv64/source
+cp riscv64/core/riscv_bp.sv                   synthesis/riscv64/source
+cp riscv64/core/riscv_core.sv                 synthesis/riscv64/source
+cp riscv64/core/riscv_du.sv                   synthesis/riscv64/source
+cp riscv64/core/riscv_execution.sv            synthesis/riscv64/source
+cp riscv64/core/riscv_id.sv                   synthesis/riscv64/source
+cp riscv64/core/riscv_if.sv                   synthesis/riscv64/source
+cp riscv64/core/riscv_memory.sv               synthesis/riscv64/source
+cp riscv64/core/riscv_rf.sv                   synthesis/riscv64/source
+cp riscv64/core/riscv_state.sv                synthesis/riscv64/source
+cp riscv64/core/riscv_wb.sv                   synthesis/riscv64/source
+cp riscv64/memory/riscv_ram_1r1w_generic.sv   synthesis/riscv64/source
+cp riscv64/memory/riscv_ram_1r1w.sv           synthesis/riscv64/source
+cp riscv64/memory/riscv_ram_1rw_generic.sv    synthesis/riscv64/source
+cp riscv64/memory/riscv_ram_1rw.sv            synthesis/riscv64/source
+cp riscv64/memory/riscv_ram_queue.sv          synthesis/riscv64/source
+cp riscv64/pu/riscv_biu.sv                    synthesis/riscv64/source
+cp riscv64/pu/riscv_pu.sv                     synthesis/riscv64/source
+
+cd synthesis/riscv64
+
+#qflow -T osu035 synthesize place route riscv_pu

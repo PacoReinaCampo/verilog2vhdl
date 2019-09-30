@@ -1,0 +1,38 @@
+cd riscv64
+
+ghdl -i core/cache/riscv_dcache_core.vhd
+ghdl -i core/cache/riscv_dext.vhd
+ghdl -i core/cache/riscv_icache_core.vhd
+ghdl -i core/cache/riscv_noicache_core.vhd
+ghdl -i core/execution/riscv_alu.vhd
+ghdl -i core/execution/riscv_bu.vhd
+ghdl -i core/execution/riscv_div.vhd
+ghdl -i core/execution/riscv_lsu.vhd
+ghdl -i core/execution/riscv_mul.vhd
+ghdl -i core/memory/riscv_dmem_ctrl.vhd
+ghdl -i core/memory/riscv_imem_ctrl.vhd
+ghdl -i core/memory/riscv_membuf.vhd
+ghdl -i core/memory/riscv_memmisaligned.vhd
+ghdl -i core/memory/riscv_mmu.vhd
+ghdl -i core/memory/riscv_mux.vhd
+ghdl -i core/memory/riscv_pmachk.vhd
+ghdl -i core/memory/riscv_pmpchk.vhd
+ghdl -i core/riscv_bp.vhd
+ghdl -i core/riscv_core.vhd
+ghdl -i core/riscv_du.vhd
+ghdl -i core/riscv_execution.vhd
+ghdl -i core/riscv_id.vhd
+ghdl -i core/riscv_if.vhd
+ghdl -i core/riscv_memory.vhd
+ghdl -i core/riscv_rf.vhd
+ghdl -i core/riscv_state.vhd
+ghdl -i core/riscv_wb.vhd
+
+ghdl -i memory/riscv_ram_1r1w.vhd
+ghdl -i memory/riscv_ram_1r1w_generic.vhd
+ghdl -i memory/riscv_ram_1rw.vhd
+ghdl -i memory/riscv_ram_1rw_generic.vhd
+ghdl -i memory/riscv_ram_queue.vhd
+
+ghdl -i pu/riscv_biu.vhd
+ghdl -i pu/riscv_pu.vhd

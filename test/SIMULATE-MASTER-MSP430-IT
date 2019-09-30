@@ -1,0 +1,4 @@
+rm -rf openmsp430.vvp
+iverilog -g2012 -o openmsp430.vvp -c openmsp430.iv -s openMSP430 \
+-I openmsp430
+vvp openmsp430.vvp

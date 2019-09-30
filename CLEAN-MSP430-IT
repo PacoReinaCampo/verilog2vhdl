@@ -1,0 +1,29 @@
+cd test/openmsp430
+
+rm -f omsp_alu.vhd
+rm -f omsp_and_gate.vhd
+rm -f omsp_clock_gate.vhd
+rm -f omsp_clock_module.vhd
+rm -f omsp_clock_mux.vhd
+rm -f omsp_dbg_hwbrk.vhd
+rm -f omsp_dbg_i2c.vhd
+rm -f omsp_dbg_uart.vhd
+rm -f omsp_dbg.vhd
+rm -f omsp_execution_unit.vhd
+rm -f omsp_frontend.vhd
+rm -f omsp_mem_backbone.vhd
+rm -f omsp_multiplier.vhd
+rm -f omsp_register_file.vhd
+rm -f omsp_scan_mux.vhd
+rm -f omsp_sfr.vhd
+rm -f omsp_sync_cell.vhd
+rm -f omsp_sync_reset.vhd
+rm -f omsp_wakeup_cell.vhd
+rm -f omsp_watchdog.vhd
+rm -f openMSP430_defines.vhd
+rm -f openMSP430.vhd
+rm -f periph/omsp_gpio.vhd
+rm -f periph/omsp_timerA_defines.vhd
+rm -f periph/omsp_timerA.vhd
+rm -f periph/template_periph_16b.vhd
+rm -f periph/template_periph_8b.vhd
