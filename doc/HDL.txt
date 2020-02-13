@@ -1,8 +1,6 @@
-Hardware Description Language (HDL) is a specialized computer language used to 
-describe the structure and behavior of digital logic circuits. It allows for the 
-synthesis of a HDL into a netlist, which can then be synthesized, placed and routed 
-to produce the set of masks used to create an integrated circuit.
+# HDL WIKI
 
+A Hardware Description Language (HDL) is a specialized computer language used to describe the structure and behavior of digital logic circuits. It allows for the synthesis of a HDL into a netlist, which can then be synthesized, placed and routed to produce the set of masks used to create an integrated circuit.
 
 1. module_definitions
 1.1. module_items
@@ -55,7 +53,8 @@ to produce the set of masks used to create an integrated circuit.
 16. synthesis_supported_constructs
 
 
------------------------------------------------------------------------------------
+## Count Lines of Code
+
 Language                         files          blank        comment           code
 -----------------------------------------------------------------------------------
 yacc                                 1            158             61           3422
@@ -69,7 +68,9 @@ SUM:                                 6            708            893           6
 -----------------------------------------------------------------------------------
 
 
-/verilog2vhdl
+## Hardware Description Language
+
+verilog2vhdl
 ├── doc
 │   └── HDL.txt
 ├── src
