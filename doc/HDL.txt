@@ -2,225 +2,52 @@
 
 A Hardware Description Language (HDL) is a specialized computer language used to describe the structure and behavior of digital logic circuits. It allows for the synthesis of a HDL into a netlist, which can then be synthesized, placed and routed to produce the set of masks used to create an integrated circuit.
 
-1. module_definitions
-1.1. module_items
-1.1.1. data_type_declarations
-1.1.2. module_instances
-1.1.3. primitive_instances
-1.1.4. generate_blocks
-1.1.5. procedural_blocks
-1.1.6. continuous_assignments
-1.1.7. task_definitions
-1.1.8. function_definitions
-1.1.9. specify_blocks
-1.2. port_declarations
-2. data_type_declarations
-2.1. net_data_types
-2.2. variable_data_types
-2.3. other_data_types
-2.4. vector_bit_selects_and_part_selects
-2.5. array_selects
-2.6. reading_and_writing_arrays
-3. module_instances
-4. primitive_instances
-5. generate_blocks
-6. procedural_blocks
-6.1. procedural_time_controls
-6.2. sensitivity_lists
-6.3. procedural_assignment_statements (=continuous_assignments)
-6.4. procedural_programming_statements
-6.4.1. if_part
-6.4.2. case_part
-6.4.3. casex_part
-6.4.4. casez_part
-6.4.5. for_part
-6.4.6. while_part
-6.4.7. repeat_part
-6.4.8. forever_part
-6.4.9. disable_part
-7. continuous_assignments
-8. operators
-9. task_definitions
-10. function_definitions
-11. specify_blocks
-11.1. pin_to_pin_path_delays
-11.2. path_pulse_detection
-11.3. timing_constraint_checks
-12. user_defined_primitives
-13. common_system_tasks_and_functions
-14. common_compiler_directives
-15. configurations
-16. synthesis_supported_constructs
-
-
-## Count Lines of Code
-
-Language                         files          blank        comment           code
------------------------------------------------------------------------------------
-yacc                                 1            158             61           3422
-C                                    1            492            744           2908
-lex                                  1             16             24            176
-C/C++ Header                         1             35             64            164
-Markdown                             1              4              0             18
-make                                 1              3              0              8
------------------------------------------------------------------------------------
-SUM:                                 6            708            893           6696
------------------------------------------------------------------------------------
-
-
-## Hardware Description Language
-
-verilog2vhdl
-├── doc
-│   └── HDL.txt
-├── src
-│   ├── makefile
-│   ├── verilog2vhdl.c
-│   ├── verilog2vhdl.h
-│   ├── veriloglex.l
-│   └── verilogparse.y
-├── test
-│   ├── openmsp430
-│   │   ├── omsp_alu.v
-│   │   ├── omsp_alu.vhd
-│   │   ├── omsp_and_gate.v
-│   │   ├── omsp_and_gate.vhd
-│   │   ├── omsp_clock_gate.v
-│   │   ├── omsp_clock_gate.vhd
-│   │   ├── omsp_clock_module.v
-│   │   ├── omsp_clock_module.vhd
-│   │   ├── omsp_clock_mux.v
-│   │   ├── omsp_clock_mux.vhd
-│   │   ├── omsp_dbg_hwbrk.v
-│   │   ├── omsp_dbg_hwbrk.vhd
-│   │   ├── omsp_dbg_i2c.v
-│   │   ├── omsp_dbg_i2c.vhd
-│   │   ├── omsp_dbg_uart.v
-│   │   ├── omsp_dbg_uart.vhd
-│   │   ├── omsp_dbg.v
-│   │   ├── omsp_dbg.vhd
-│   │   ├── omsp_execution_unit.v
-│   │   ├── omsp_execution_unit.vhd
-│   │   ├── omsp_frontend.v
-│   │   ├── omsp_frontend.vhd
-│   │   ├── omsp_mem_backbone.v
-│   │   ├── omsp_mem_backbone.vhd
-│   │   ├── omsp_multiplier.v
-│   │   ├── omsp_multiplier.vhd
-│   │   ├── omsp_register_file.v
-│   │   ├── omsp_register_file.vhd
-│   │   ├── omsp_scan_mux.v
-│   │   ├── omsp_scan_mux.vhd
-│   │   ├── omsp_sfr.v
-│   │   ├── omsp_sfr.vhd
-│   │   ├── omsp_sync_cell.v
-│   │   ├── omsp_sync_cell.vhd
-│   │   ├── omsp_sync_reset.v
-│   │   ├── omsp_sync_reset.vhd
-│   │   ├── omsp_wakeup_cell.v
-│   │   ├── omsp_wakeup_cell.vhd
-│   │   ├── omsp_watchdog.v
-│   │   ├── omsp_watchdog.vhd
-│   │   ├── openMSP430_defines.v
-│   │   ├── openMSP430.v
-│   │   ├── openMSP430.vhd
-│   │   └── periph
-│   │       ├── omsp_gpio.v
-│   │       ├── omsp_gpio.vhd
-│   │       ├── omsp_timerA.v
-│   │       ├── omsp_timerA.vhd
-│   │       ├── template_periph_16b.v
-│   │       ├── template_periph_16b.vhd
-│   │       ├── template_periph_8b.v
-│   │       └── template_periph_8b.vhd
-│   ├── riscv64
-│   │   ├── core
-│   │   │   ├── cache
-│   │   │   │   ├── riscv_dcache_core.sv
-│   │   │   │   ├── riscv_dcache_core.vhd
-│   │   │   │   ├── riscv_dext.sv
-│   │   │   │   ├── riscv_dext.vhd
-│   │   │   │   ├── riscv_icache_core.sv
-│   │   │   │   ├── riscv_icache_core.vhd
-│   │   │   │   ├── riscv_noicache_core.sv
-│   │   │   │   └── riscv_noicache_core.vhd
-│   │   │   ├── execution
-│   │   │   │   ├── riscv_alu.sv
-│   │   │   │   ├── riscv_bu.sv
-│   │   │   │   ├── riscv_div.sv
-│   │   │   │   ├── riscv_div.vhd
-│   │   │   │   ├── riscv_lsu.sv
-│   │   │   │   ├── riscv_mul.sv
-│   │   │   │   └── riscv_mul.vhd
-│   │   │   ├── memory
-│   │   │   │   ├── riscv_dmem_ctrl.sv
-│   │   │   │   ├── riscv_dmem_ctrl.vhd
-│   │   │   │   ├── riscv_imem_ctrl.sv
-│   │   │   │   ├── riscv_imem_ctrl.vhd
-│   │   │   │   ├── riscv_membuf.sv
-│   │   │   │   ├── riscv_membuf.vhd
-│   │   │   │   ├── riscv_memmisaligned.sv
-│   │   │   │   ├── riscv_memmisaligned.vhd
-│   │   │   │   ├── riscv_mmu.sv
-│   │   │   │   ├── riscv_mmu.vhd
-│   │   │   │   ├── riscv_mux.sv
-│   │   │   │   ├── riscv_mux.vhd
-│   │   │   │   ├── riscv_pmachk.sv
-│   │   │   │   ├── riscv_pmpchk.sv
-│   │   │   │   └── riscv_pmpchk.vhd
-│   │   │   ├── riscv_bp.sv
-│   │   │   ├── riscv_bp.vhd
-│   │   │   ├── riscv_core.sv
-│   │   │   ├── riscv_core.vhd
-│   │   │   ├── riscv_du.sv
-│   │   │   ├── riscv_du.vhd
-│   │   │   ├── riscv_execution.sv
-│   │   │   ├── riscv_execution.vhd
-│   │   │   ├── riscv_id.sv
-│   │   │   ├── riscv_id.vhd
-│   │   │   ├── riscv_if.sv
-│   │   │   ├── riscv_memory.sv
-│   │   │   ├── riscv_memory.vhd
-│   │   │   ├── riscv_rf.sv
-│   │   │   ├── riscv_rf.vhd
-│   │   │   ├── riscv_state.sv
-│   │   │   ├── riscv_state.vhd
-│   │   │   ├── riscv_wb.sv
-│   │   │   └── riscv_wb.vhd
-│   │   ├── memory
-│   │   │   ├── riscv_ram_1r1w_generic.sv
-│   │   │   ├── riscv_ram_1r1w_generic.vhd
-│   │   │   ├── riscv_ram_1r1w.sv
-│   │   │   ├── riscv_ram_1r1w.vhd
-│   │   │   ├── riscv_ram_1rw_generic.sv
-│   │   │   ├── riscv_ram_1rw_generic.vhd
-│   │   │   ├── riscv_ram_1rw.sv
-│   │   │   ├── riscv_ram_1rw.vhd
-│   │   │   ├── riscv_ram_queue.sv
-│   │   │   └── riscv_ram_queue.vhd
-│   │   ├── pkg
-│   │   │   └── riscv_pu_pkg.sv
-│   │   └── pu
-│   │       ├── riscv_biu.sv
-│   │       ├── riscv_biu.vhd
-│   │       ├── riscv_pu.sv
-│   │       └── riscv_pu.vhd
-│   ├── openmsp430.iv
-│   ├── openmsp430.qf
-│   ├── openmsp430.vvp
-│   ├── riscv64.iv
-│   ├── riscv64.qf
-│   ├── riscv64.vvp
-│   ├── SIMULATE-MASTER-MSP430-IT
-│   ├── SIMULATE-MASTER-RISCV64-IT
-│   ├── SIMULATE-SLAVE-MSP430-IT
-│   ├── SIMULATE-SLAVE-RISCV64-IT
-│   ├── SYNTHESIZE-MASTER-MSP430-IT
-│   └── SYNTHESIZE-MASTER-RISCV64-IT
-├── README.md
-├── CLEAN-MSP430-IT
-├── CLEAN-RISCV64-IT
-├── INSTALL-IT
-├── TEST-MSP430-IT
-├── TEST-RISCV64-IT
-└── UPLOAD-IT
+* .1. module_definitions
+* .1.1. module_items
+* .1.1.1. data_type_declarations
+* .1.1.2. module_instances
+* .1.1.3. primitive_instances
+* .1.1.4. generate_blocks
+* .1.1.5. procedural_blocks
+* .1.1.6. continuous_assignments
+* .1.1.7. task_definitions
+* .1.1.8. function_definitions
+* .1.1.9. specify_blocks
+* .1.2. port_declarations
+* .2. data_type_declarations
+* .2.1. net_data_types
+* .2.2. variable_data_types
+* .2.3. other_data_types
+* .2.4. vector_bit_selects_and_part_selects
+* .2.5. array_selects
+* .2.6. reading_and_writing_arrays
+* .3. module_instances
+* .4. primitive_instances
+* .5. generate_blocks
+* .6. procedural_blocks
+* .6.1. procedural_time_controls
+* .6.2. sensitivity_lists
+* .6.3. procedural_assignment_statements (=continuous_assignments)
+* .6.4. procedural_programming_statements
+* .6.4.1. if_part
+* .6.4.2. case_part
+* .6.4.3. casex_part
+* .6.4.4. casez_part
+* .6.4.5. for_part
+* .6.4.6. while_part
+* .6.4.7. repeat_part
+* .6.4.8. forever_part
+* .6.4.9. disable_part
+* .7. continuous_assignments
+* .8. operators
+* .9. task_definitions
+* .10. function_definitions
+* .11. specify_blocks
+* .11.1. pin_to_pin_path_delays
+* .11.2. path_pulse_detection
+* .11.3. timing_constraint_checks
+* .12. user_defined_primitives
+* .13. common_system_tasks_and_functions
+* .14. common_compiler_directives
+* .15. configurations
+* .16. synthesis_supported_constructs
