@@ -178,14 +178,17 @@ module  MEMORY (
 
   reg  [15:0] pmem_dout_bckup;
 
+  `ifdef CLOCK_GATING
   always @(posedge mclk_bckup or posedge puc_rst) begin
     if (puc_rst)           pmem_dout_bckup     <=  16'h0000;
-    `ifdef CLOCK_GATING
     else                   pmem_dout_bckup     <=  pmem_dout;
-    `else
-    else if (fe_pmem_save) pmem_dout_bckup     <=  pmem_dout;
-    `endif
   end
+  `else
+  always @(posedge mclk_bckup or posedge puc_rst) begin
+    if (puc_rst)           pmem_dout_bckup     <=  16'h0000;
+    else if (fe_pmem_save) pmem_dout_bckup     <=  pmem_dout;
+  end
+  `endif
 
   // Mux between the ROM data and the backup
   reg         pmem_dout_bckup_sel;

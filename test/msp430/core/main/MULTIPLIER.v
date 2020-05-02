@@ -152,14 +152,17 @@ module  MULTIPLIER (
   wire        mclk_op1 = mclk;
   `endif
 
+  `ifdef CLOCK_GATING
   always @ (posedge mclk_op1 or posedge puc_rst) begin
     if (puc_rst)      op1 <=  16'h0000;
-    `ifdef CLOCK_GATING
     else              op1 <=  per_din_msk;
-    `else
-    else if (op1_wr)  op1 <=  per_din_msk;
-    `endif
   end
+  `else
+  always @ (posedge mclk_op1 or posedge puc_rst) begin
+    if (puc_rst)      op1 <=  16'h0000;
+    else if (op1_wr)  op1 <=  per_din_msk;
+  end
+  `endif
 
   wire [15:0] op1_rd  = op1;
 
@@ -182,14 +185,17 @@ module  MULTIPLIER (
   wire        mclk_op2 = mclk;
   `endif
 
+  `ifdef CLOCK_GATING
   always @ (posedge mclk_op2 or posedge puc_rst) begin
     if (puc_rst)      op2 <=  16'h0000;
-    `ifdef CLOCK_GATING
     else              op2 <=  per_din_msk;
-    `else
-    else if (op2_wr)  op2 <=  per_din_msk;
-    `endif
   end
+  `else
+  always @ (posedge mclk_op2 or posedge puc_rst) begin
+    if (puc_rst)      op2 <=  16'h0000;
+    else if (op2_wr)  op2 <=  per_din_msk;
+  end
+  `endif
 
   wire [15:0] op2_rd  = op2;
 
@@ -214,16 +220,21 @@ module  MULTIPLIER (
   wire        mclk_reslo = mclk;
   `endif
 
+  `ifdef CLOCK_GATING
   always @ (posedge mclk_reslo or posedge puc_rst) begin
     if (puc_rst)         reslo <=  16'h0000;
     else if (reslo_wr)   reslo <=  per_din_msk;
     else if (result_clr) reslo <=  16'h0000;
-    `ifdef CLOCK_GATING
     else                 reslo <=  reslo_nxt;
-    `else
-    else if (result_wr)  reslo <=  reslo_nxt;
-    `endif
   end
+  `else
+  always @ (posedge mclk_reslo or posedge puc_rst) begin
+    if (puc_rst)         reslo <=  16'h0000;
+    else if (reslo_wr)   reslo <=  per_din_msk;
+    else if (result_clr) reslo <=  16'h0000;
+    else if (result_wr)  reslo <=  reslo_nxt;
+  end
+  `endif
 
   wire [15:0] reslo_rd = early_read ? reslo_nxt : reslo;
 
@@ -248,16 +259,21 @@ module  MULTIPLIER (
   wire        mclk_reshi = mclk;
   `endif
 
+  `ifdef CLOCK_GATING
   always @ (posedge mclk_reshi or posedge puc_rst) begin
     if (puc_rst)         reshi <=  16'h0000;
     else if (reshi_wr)   reshi <=  per_din_msk;
     else if (result_clr) reshi <=  16'h0000;
-    `ifdef CLOCK_GATING
     else                 reshi <=  reshi_nxt;
-    `else
-    else if (result_wr)  reshi <=  reshi_nxt;
-    `endif
   end
+  `else
+  always @ (posedge mclk_reshi or posedge puc_rst) begin
+    if (puc_rst)         reshi <=  16'h0000;
+    else if (reshi_wr)   reshi <=  per_din_msk;
+    else if (result_clr) reshi <=  16'h0000;
+    else if (result_wr)  reshi <=  reshi_nxt;
+  end
+  `endif
 
   wire [15:0] reshi_rd = early_read ? reshi_nxt  : reshi;
 
@@ -306,25 +322,33 @@ module  MULTIPLIER (
 
   // Detect signed mode
   reg sign_sel;
+
+  `ifdef CLOCK_GATING
   always @ (posedge mclk_op1 or posedge puc_rst) begin
     if (puc_rst)     sign_sel <=  1'b0;
-    `ifdef CLOCK_GATING
     else             sign_sel <=  reg_wr[OP1_MPYS] | reg_wr[OP1_MACS];
-    `else
-    else if (op1_wr) sign_sel <=  reg_wr[OP1_MPYS] | reg_wr[OP1_MACS];
-    `endif
   end
+  `else
+  always @ (posedge mclk_op1 or posedge puc_rst) begin
+    if (puc_rst)     sign_sel <=  1'b0;
+    else if (op1_wr) sign_sel <=  reg_wr[OP1_MPYS] | reg_wr[OP1_MACS];
+  end
+  `endif
 
   // Detect accumulate mode
   reg acc_sel;
+
+  `ifdef CLOCK_GATING
   always @ (posedge mclk_op1 or posedge puc_rst) begin
     if (puc_rst)     acc_sel  <=  1'b0;
-    `ifdef CLOCK_GATING
     else             acc_sel  <=  reg_wr[OP1_MAC]  | reg_wr[OP1_MACS];
-    `else
-    else if (op1_wr) acc_sel  <=  reg_wr[OP1_MAC]  | reg_wr[OP1_MACS];
-    `endif
   end
+  `else
+  always @ (posedge mclk_op1 or posedge puc_rst) begin
+    if (puc_rst)     acc_sel  <=  1'b0;
+    else if (op1_wr) acc_sel  <=  reg_wr[OP1_MAC]  | reg_wr[OP1_MACS];
+  end
+  `endif
 
   // Detect whenever the RESHI and RESLO registers should be cleared
   assign      result_clr = op2_wr & ~acc_sel;

@@ -279,14 +279,17 @@ module  DBG (
 
   wire        cpu_ctl_wr = reg_wr[CPU_CTL];
 
+  `ifdef DBG_RST_BRK_EN
   always @ (posedge dbg_clk or posedge dbg_rst) begin
-    `ifdef DBG_RST_BRK_EN
     if (dbg_rst)         cpu_ctl <=  4'h6;
-    `else
-    if (dbg_rst)         cpu_ctl <=  4'h2;
-    `endif
     else if (cpu_ctl_wr) cpu_ctl <=  dbg_din[6:3];
   end
+  `else
+  always @ (posedge dbg_clk or posedge dbg_rst) begin
+    if (dbg_rst)         cpu_ctl <=  4'h2;
+    else if (cpu_ctl_wr) cpu_ctl <=  dbg_din[6:3];
+  end
+  `endif
 
   wire  [7:0] cpu_ctl_full = {1'b0, cpu_ctl, 3'b000};
 

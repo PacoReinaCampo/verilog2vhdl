@@ -155,14 +155,17 @@ module  T_WATCHDOG (
 
   parameter [7:0] WDTCTL_MASK   = (8'b1001_0011 | WDTSSEL_MASK | WDTNMIES_MASK);
 
+  `ifdef CLOCK_GATING
   always @ (posedge mclk_wdtctl or posedge puc_rst) begin
     if (puc_rst)        wdtctl <=  8'h00;
-    `ifdef CLOCK_GATING
     else                wdtctl <=  per_din[7:0] & WDTCTL_MASK;
-    `else
-    else if (wdtctl_wr) wdtctl <=  per_din[7:0] & WDTCTL_MASK;
-    `endif
   end
+  `else
+  always @ (posedge mclk_wdtctl or posedge puc_rst) begin
+    if (puc_rst)        wdtctl <=  8'h00;
+    else if (wdtctl_wr) wdtctl <=  per_din[7:0] & WDTCTL_MASK;
+  end
+  `endif
 
   wire       wdtpw_error = wdtctl_wr & (per_din[15:8]!=8'h5a);
   wire       wdttmsel    = wdtctl[4];
@@ -299,15 +302,19 @@ module  T_WATCHDOG (
   wire       wdt_clk_cnt = wdt_clk;
   `endif
 
+  `ifdef CLOCK_GATING
   always @ (posedge wdt_clk_cnt or posedge wdt_rst) begin
     if (wdt_rst)           wdtcnt <= 16'h0000;
     else if (wdtcnt_clr)   wdtcnt <= 16'h0000;
-    `ifdef CLOCK_GATING
     else                   wdtcnt <= wdtcnt_nxt;
-    `else
-    else if (wdtcnt_incr)  wdtcnt <= wdtcnt_nxt;
-    `endif
   end
+  `else
+  always @ (posedge wdt_clk_cnt or posedge wdt_rst) begin
+    if (wdt_rst)           wdtcnt <= 16'h0000;
+    else if (wdtcnt_clr)   wdtcnt <= 16'h0000;
+    else if (wdtcnt_incr)  wdtcnt <= wdtcnt_nxt;
+  end
+  `endif
 
   // Local synchronizer for the wdtctl.WDTISx
   // configuration (note that we can live with

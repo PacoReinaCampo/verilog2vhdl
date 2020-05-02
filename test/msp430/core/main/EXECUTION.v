@@ -344,16 +344,20 @@ module  EXECUTION (
   wire        mclk_mdb_out_nxt = mclk;
   `endif
 
+  `ifdef CLOCK_GATING
   always @(posedge mclk_mdb_out_nxt or posedge puc_rst) begin
     if (puc_rst)                                        mdb_out_nxt <= 16'h0000;
     else if (e_state==`E_DST_RD)                        mdb_out_nxt <= pc_nxt;
-    `ifdef CLOCK_GATING
     else                                                mdb_out_nxt <= alu_out;
-    `else
+  end
+  `else
+  always @(posedge mclk_mdb_out_nxt or posedge puc_rst) begin
+    if (puc_rst)                                        mdb_out_nxt <= 16'h0000;
+    else if (e_state==`E_DST_RD)                        mdb_out_nxt <= pc_nxt;
     else if ((e_state==`E_EXEC & ~inst_so[`CALL]) |
              (e_state==`E_IRQ_0) | (e_state==`E_IRQ_2)) mdb_out_nxt <= alu_out;
-    `endif
   end
+  `endif
 
   assign      mdb_out = inst_bw ? {2{mdb_out_nxt[7:0]}} : mdb_out_nxt;
 
@@ -399,14 +403,17 @@ module  EXECUTION (
   wire        mclk_mdb_in_buf = mclk;
   `endif
 
+  `ifdef CLOCK_GATING
   always @(posedge mclk_mdb_in_buf or posedge puc_rst) begin
     if (puc_rst)            mdb_in_buf <= 16'h0000;
-    `ifdef CLOCK_GATING
     else                    mdb_in_buf <= mdb_in_bw;
-    `else
-    else if (mdb_in_buf_en) mdb_in_buf <= mdb_in_bw;
-    `endif
   end
+  `else
+  always @(posedge mclk_mdb_in_buf or posedge puc_rst) begin
+    if (puc_rst)            mdb_in_buf <= 16'h0000;
+    else if (mdb_in_buf_en) mdb_in_buf <= mdb_in_bw;
+  end
+  `endif
 
   assign mdb_in_val = mdb_in_buf_valid ? mdb_in_buf : mdb_in_bw;
 endmodule // EXECUTION

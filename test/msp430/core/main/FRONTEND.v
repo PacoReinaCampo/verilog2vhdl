@@ -262,28 +262,29 @@ module  FRONTEND (
 
   // Combine all IRQs
   `ifdef  IRQ_16
-  wire [62:0] irq_all     = {nmi_pnd, irq, 48'h0000_0000_0000} |
+  assign      irq_all     = {nmi_pnd, irq, 48'h0000_0000_0000} | {1'b0,    3'h0, wdt_irq, {58{1'b0}}};
   `else
   `ifdef  IRQ_32
-  wire [62:0] irq_all     = {nmi_pnd, irq, 32'h0000}           |
+  assign      irq_all     = {nmi_pnd, irq, 32'h0000_0000}      | {1'b0,    3'h0, wdt_irq, {58{1'b0}}};
   `else
   `ifdef  IRQ_64
-  wire [62:0] irq_all     = {nmi_pnd, irq}                     |
+  assign      irq_all     = {nmi_pnd, irq}                     | {1'b0,    3'h0, wdt_irq, {58{1'b0}}};
   `endif
   `endif
   `endif
-                            {1'b0,    3'h0, wdt_irq, {58{1'b0}}};
 
   // Select highest priority IRQ
+  `ifdef CLOCK_GATING
   always @(posedge mclk_irq_num or posedge puc_rst) begin
     if (puc_rst)         irq_num <= 6'h3f;
-    `ifdef CLOCK_GATING
-    else
-    `else
-    else if (irq_detect)
-    `endif
-                         irq_num <= get_irq_num(irq_all);
+    else                 irq_num <= get_irq_num(irq_all);
   end
+  `else
+  always @(posedge mclk_irq_num or posedge puc_rst) begin
+    if (puc_rst)         irq_num <= 6'h3f;
+    else if (irq_detect) irq_num <= get_irq_num(irq_all);
+  end
+  `endif
 
   // Generate selected IRQ vector address
   wire [15:0] irq_addr    = {9'h1ff, irq_num, 1'b0};
@@ -409,16 +410,21 @@ module  FRONTEND (
   wire       mclk_inst_sext = mclk;
   `endif
 
+  `ifdef CLOCK_GATING
   always @(posedge mclk_inst_sext or posedge puc_rst) begin
     if (puc_rst)                                 inst_sext <= 16'h0000;
     else if (decode & is_const)                  inst_sext <= sconst_nxt;
     else if (decode & inst_type_nxt[`INST_JMP])  inst_sext <= {{5{ir[9]}},ir[9:0],1'b0};
-    `ifdef CLOCK_GATING
     else                                         inst_sext <= ext_nxt;
-    `else
-    else if ((i_state==I_EXT1) & is_sext)        inst_sext <= ext_nxt;
-    `endif
   end
+  `else
+  always @(posedge mclk_inst_sext or posedge puc_rst) begin
+    if (puc_rst)                                 inst_sext <= 16'h0000;
+    else if (decode & is_const)                  inst_sext <= sconst_nxt;
+    else if (decode & inst_type_nxt[`INST_JMP])  inst_sext <= {{5{ir[9]}},ir[9:0],1'b0};
+    else if ((i_state==I_EXT1) & is_sext)        inst_sext <= ext_nxt;
+  end
+  `endif
 
   // Source extension word is ready
   wire inst_sext_rdy = (i_state==I_EXT1) & is_sext;
@@ -439,15 +445,19 @@ module  FRONTEND (
   wire       mclk_inst_dext = mclk;
   `endif
 
+  `ifdef CLOCK_GATING
   always @(posedge mclk_inst_dext or posedge puc_rst) begin
     if (puc_rst)                           inst_dext <= 16'h0000;
     else if ((i_state==I_EXT1) & ~is_sext) inst_dext <= ext_nxt;
-    `ifdef CLOCK_GATING
     else                                   inst_dext <= ext_nxt;
-    `else
-    else if  (i_state==I_EXT2)             inst_dext <= ext_nxt;
-    `endif
   end
+  `else
+  always @(posedge mclk_inst_dext or posedge puc_rst) begin
+    if (puc_rst)                           inst_dext <= 16'h0000;
+    else if ((i_state==I_EXT1) & ~is_sext) inst_dext <= ext_nxt;
+    else if  (i_state==I_EXT2)             inst_dext <= ext_nxt;
+  end
+  `endif
 
   // Destination extension word is ready
   wire inst_dext_rdy = (((i_state==I_EXT1) & ~is_sext) | (i_state==I_EXT2));
@@ -482,14 +492,17 @@ module  FRONTEND (
                               (ir[15:13]==3'b001),
                               (ir[15:13]==3'b000)} & {3{~irq_detect}};
 
+  `ifdef CLOCK_GATING
   always @(posedge mclk_decode or posedge puc_rst) begin
     if (puc_rst)      inst_type <= 3'b000;
-    `ifdef CLOCK_GATING
     else              inst_type <= inst_type_nxt;
-    `else
-    else if (decode)  inst_type <= inst_type_nxt;
-    `endif
   end
+  `else
+  always @(posedge mclk_decode or posedge puc_rst) begin
+    if (puc_rst)      inst_type <= 3'b000;
+    else if (decode)  inst_type <= inst_type_nxt;
+  end
+  `endif
 
   //
   // 6.2) OPCODE: SINGLE-OPERAND ARITHMETIC
@@ -507,14 +520,17 @@ module  FRONTEND (
 
   wire  [7:0] inst_so_nxt = irq_detect ? 8'h80 : (one_hot8(ir[9:7]) & {8{inst_type_nxt[`INST_SO]}});
 
+  `ifdef CLOCK_GATING
   always @(posedge mclk_decode or posedge puc_rst) begin
     if (puc_rst)     inst_so <= 8'h00;
-    `ifdef CLOCK_GATING
     else             inst_so <= inst_so_nxt;
-    `else
-    else if (decode) inst_so <= inst_so_nxt;
-    `endif
   end
+  `else
+  always @(posedge mclk_decode or posedge puc_rst) begin
+    if (puc_rst)     inst_so <= 8'h00;
+    else if (decode) inst_so <= inst_so_nxt;
+  end
+  `endif
 
   //
   // 6.3) OPCODE: CONDITIONAL JUMP
@@ -532,14 +548,17 @@ module  FRONTEND (
 
   reg   [2:0] inst_jmp_bin;
 
+  `ifdef CLOCK_GATING
   always @(posedge mclk_decode or posedge puc_rst) begin
     if (puc_rst)     inst_jmp_bin <= 3'h0;
-    `ifdef CLOCK_GATING
     else             inst_jmp_bin <= ir[12:10];
-    `else
-    else if (decode) inst_jmp_bin <= ir[12:10];
-    `endif
   end
+  `else
+  always @(posedge mclk_decode or posedge puc_rst) begin
+    if (puc_rst)     inst_jmp_bin <= 3'h0;
+    else if (decode) inst_jmp_bin <= ir[12:10];
+  end
+  `endif
 
   assign     inst_jmp = one_hot8(inst_jmp_bin) & {8{inst_type[`INST_JMP]}};
 
@@ -564,14 +583,17 @@ module  FRONTEND (
   wire [15:0] inst_to_1hot = one_hot16(ir[15:12]) & {16{inst_type_nxt[`INST_TO]}};
   wire [11:0] inst_to_nxt  = inst_to_1hot[15:4];
 
+  `ifdef CLOCK_GATING
   always @(posedge mclk_decode or posedge puc_rst) begin
     if (puc_rst)     inst_mov <= 1'b0;
-    `ifdef CLOCK_GATING
     else             inst_mov <= inst_to_nxt[`MOV];
-    `else
-    else if (decode) inst_mov <= inst_to_nxt[`MOV];
-    `endif
   end
+  `else
+  always @(posedge mclk_decode or posedge puc_rst) begin
+    if (puc_rst)     inst_mov <= 1'b0;
+    else if (decode) inst_mov <= inst_to_nxt[`MOV];
+  end
+  `endif
 
   //
   // 6.5) SOURCE AND DESTINATION REGISTERS
@@ -580,14 +602,17 @@ module  FRONTEND (
   // Destination register
   reg [3:0] inst_dest_bin;
 
+  `ifdef CLOCK_GATING
   always @(posedge mclk_decode or posedge puc_rst) begin
     if (puc_rst)     inst_dest_bin <= 4'h0;
-    `ifdef CLOCK_GATING
     else             inst_dest_bin <= ir[3:0];
-    `else
-    else if (decode) inst_dest_bin <= ir[3:0];
-    `endif
   end
+  `else
+  always @(posedge mclk_decode or posedge puc_rst) begin
+    if (puc_rst)     inst_dest_bin <= 4'h0;
+    else if (decode) inst_dest_bin <= ir[3:0];
+  end
+  `endif
 
   assign       inst_dest = dbg_halt_st          ? one_hot16(dbg_reg_sel) :
                            inst_type[`INST_JMP] ? 16'h0001               :
@@ -599,14 +624,17 @@ module  FRONTEND (
   // Source register
   reg [3:0] inst_src_bin;
 
+  `ifdef CLOCK_GATING
   always @(posedge mclk_decode or posedge puc_rst) begin
     if (puc_rst)     inst_src_bin <= 4'h0;
-    `ifdef CLOCK_GATING
     else             inst_src_bin <= ir[11:8];
-    `else
-    else if (decode) inst_src_bin <= ir[11:8];
-    `endif
   end
+  `else
+  always @(posedge mclk_decode or posedge puc_rst) begin
+    if (puc_rst)     inst_src_bin <= 4'h0;
+    else if (decode) inst_src_bin <= ir[11:8];
+  end
+  `endif
 
   assign       inst_src = inst_type[`INST_TO] ? one_hot16(inst_src_bin)  :
                           inst_so[`RETI]      ? 16'h0002                 :
@@ -671,14 +699,17 @@ module  FRONTEND (
 
   assign    is_const = |inst_as_nxt[12:7];
 
+  `ifdef CLOCK_GATING
   always @(posedge mclk_decode or posedge puc_rst) begin
     if (puc_rst)     inst_as <= 8'h00;
-    `ifdef CLOCK_GATING
     else             inst_as <= {is_const, inst_as_nxt[6:0]};
-    `else
-    else if (decode) inst_as <= {is_const, inst_as_nxt[6:0]};
-    `endif
   end
+  `else
+  always @(posedge mclk_decode or posedge puc_rst) begin
+    if (puc_rst)     inst_as <= 8'h00;
+    else if (decode) inst_as <= {is_const, inst_as_nxt[6:0]};
+  end
+  `endif
 
   // 13'b0000010000000: Constant 4.
   // 13'b0000100000000: Constant 8.
@@ -730,14 +761,17 @@ module  FRONTEND (
       endcase
   end
 
+  `ifdef CLOCK_GATING
   always @(posedge mclk_decode or posedge puc_rst) begin
     if (puc_rst)     inst_ad <= 8'h00;
-    `ifdef CLOCK_GATING
     else             inst_ad <= inst_ad_nxt;
-    `else
-    else if (decode) inst_ad <= inst_ad_nxt;
-    `endif
   end
+  `else
+  always @(posedge mclk_decode or posedge puc_rst) begin
+    if (puc_rst)     inst_ad <= 8'h00;
+    else if (decode) inst_ad <= inst_ad_nxt;
+  end
+  `endif
 
   //
   // 6.8) REMAINING INSTRUCTION DECODING
@@ -753,14 +787,17 @@ module  FRONTEND (
   assign    inst_sz_nxt = {1'b0,  (inst_as_nxt[`IDX] | inst_as_nxt[`SYMB] | inst_as_nxt[`ABS] | inst_as_nxt[`IMM])} +
                           {1'b0, ((inst_ad_nxt[`IDX] | inst_ad_nxt[`SYMB] | inst_ad_nxt[`ABS]) & ~inst_type_nxt[`INST_SO])};
 
+  `ifdef CLOCK_GATING
   always @(posedge mclk_decode or posedge puc_rst) begin
     if (puc_rst)     inst_sz     <= 2'b00;
-    `ifdef CLOCK_GATING
     else             inst_sz     <= inst_sz_nxt;
-    `else
-    else if (decode) inst_sz     <= inst_sz_nxt;
-    `endif
   end
+  `else
+  always @(posedge mclk_decode or posedge puc_rst) begin
+    if (puc_rst)     inst_sz     <= 2'b00;
+    else if (decode) inst_sz     <= inst_sz_nxt;
+  end
+  `endif
 
   //=============================================================================
   // 7)  EXECUTION-UNIT STATE MACHINE
@@ -907,29 +944,29 @@ module  FRONTEND (
                               inst_so_nxt[`RETI];
 
 
-  wire        alu_and       = inst_to_nxt[`AND]  | inst_to_nxt[`BIC]  |
-                              inst_to_nxt[`BIT];
+  wire        alu_and       = inst_to_nxt[`ANDX] | inst_to_nxt[`BIC]  |
+                              inst_to_nxt[`BITC];
 
   wire        alu_or        = inst_to_nxt[`BIS];
 
-  wire        alu_xor       = inst_to_nxt[`XOR];
+  wire        alu_xor       = inst_to_nxt[`XORX];
 
   wire        alu_dadd      = inst_to_nxt[`DADD];
 
-  wire        alu_stat_7    = inst_to_nxt[`BIT]  | inst_to_nxt[`AND]  |
+  wire        alu_stat_7    = inst_to_nxt[`BITC] | inst_to_nxt[`ANDX] |
                               inst_so_nxt[`SXT];
 
   wire        alu_stat_f    = inst_to_nxt[`ADD]  | inst_to_nxt[`ADDC] |
                               inst_to_nxt[`SUB]  | inst_to_nxt[`SUBC] |
                               inst_to_nxt[`CMP]  | inst_to_nxt[`DADD] |
-                              inst_to_nxt[`BIT]  | inst_to_nxt[`XOR]  |
-                              inst_to_nxt[`AND]  |
+                              inst_to_nxt[`BITC] | inst_to_nxt[`XORX] |
+                              inst_to_nxt[`ANDX] |
                               inst_so_nxt[`RRC]  | inst_so_nxt[`RRA]  |
                               inst_so_nxt[`SXT];
 
   wire        alu_shift     = inst_so_nxt[`RRC]  | inst_so_nxt[`RRA];
 
-  wire        exec_no_wr    = inst_to_nxt[`CMP] | inst_to_nxt[`BIT];
+  wire        exec_no_wr    = inst_to_nxt[`CMP] | inst_to_nxt[`BITC];
 
   wire [11:0] inst_alu_nxt  = {exec_no_wr,
                                alu_shift,
@@ -943,15 +980,17 @@ module  FRONTEND (
                                alu_inc_c,
                                alu_inc,
                                alu_src_inv};
-
+  `ifdef CLOCK_GATING
   always @(posedge mclk_decode or posedge puc_rst) begin
     if (puc_rst)     inst_alu <= 12'h000;
-    `ifdef CLOCK_GATING
     else             inst_alu <= inst_alu_nxt;
-    `else
-    else if (decode) inst_alu <= inst_alu_nxt;
-    `endif
   end
+  `else
+  always @(posedge mclk_decode or posedge puc_rst) begin
+    if (puc_rst)     inst_alu <= 12'h000;
+    else if (decode) inst_alu <= inst_alu_nxt;
+  end
+  `endif
 endmodule // FRONTEND
 `ifdef OMSP_NO_INCLUDE
 `else

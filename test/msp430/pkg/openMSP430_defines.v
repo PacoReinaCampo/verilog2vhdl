@@ -688,11 +688,11 @@
 `define SUB    4
 `define CMP    5
 `define DADD   6
-`define BIT    7
+`define BITC   7
 `define BIC    8
 `define BIS    9
-`define XOR   10
-`define AND   11
+`define XORX  10
+`define ANDX  11
 
 // Addressing modes
 `define DIR      0
@@ -846,20 +846,6 @@
 // Counter width for the debug interface UART
 `define DBG_UART_XFER_CNT_W 16
 
-// Check configuration
-`ifdef DBG_EN
- `ifdef DBG_UART
-   `ifdef DBG_I2C
-CONFIGURATION ERROR: I2C AND UART DEBUG INTERFACE ARE BOTH ENABLED
-   `endif
- `else
-   `ifdef DBG_I2C
-   `else
-CONFIGURATION ERROR: I2C OR UART DEBUG INTERFACE SHOULD BE ENABLED
-   `endif
- `endif
-`endif
-
 //
 // MULTIPLIER CONFIGURATION
 //======================================
@@ -903,40 +889,3 @@ CONFIGURATION ERROR: I2C OR UART DEBUG INTERFACE SHOULD BE ENABLED
 `define TAOUT       2
 `define TACOV       1
 `define TACCIFG     0
-  
-//======================================
-// CONFIGURATION CHECKS
-//======================================
-
-`ifdef  IRQ_16
-  `ifdef  IRQ_32
-CONFIGURATION ERROR: ONLY ONE OF THE IRQ NUMBER OPTION CAN BE SELECTED
-  `endif
-  `ifdef  IRQ_64
-CONFIGURATION ERROR: ONLY ONE OF THE IRQ NUMBER OPTION CAN BE SELECTED
-  `endif
-`endif
-`ifdef  IRQ_32
-  `ifdef  IRQ_64
-CONFIGURATION ERROR: ONLY ONE OF THE IRQ NUMBER OPTION CAN BE SELECTED
-  `endif
-`endif
-`ifdef LFXT_DOMAIN
-`else
- `ifdef MCLK_MUX
-CONFIGURATION ERROR: THE MCLK_MUX CAN ONLY BE ENABLED IF THE LFXT_DOMAIN IS ENABLED AS WELL
- `endif
- `ifdef SMCLK_MUX
-CONFIGURATION ERROR: THE SMCLK_MUX CAN ONLY BE ENABLED IF THE LFXT_DOMAIN IS ENABLED AS WELL
- `endif   
- `ifdef WATCHDOG_MUX
-CONFIGURATION ERROR: THE WATCHDOG_MUX CAN ONLY BE ENABLED IF THE LFXT_DOMAIN IS ENABLED AS WELL
- `else
-   `ifdef WATCHDOG_NOMUX_ACLK
-CONFIGURATION ERROR: THE WATCHDOG_NOMUX_ACLK CAN ONLY BE ENABLED IF THE LFXT_DOMAIN IS ENABLED AS WELL
-   `endif
- `endif
- `ifdef OSCOFF_EN
-CONFIGURATION ERROR: THE OSCOFF LOW POWER MODE CAN ONLY BE ENABLED IF THE LFXT_DOMAIN IS ENABLED AS WELL
- `endif   
-`endif

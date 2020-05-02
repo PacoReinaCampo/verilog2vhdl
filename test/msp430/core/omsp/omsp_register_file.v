@@ -138,16 +138,21 @@ module  omsp_register_file (
   wire       mclk_r1 = mclk;
   `endif
 
+  `ifdef CLOCK_GATING
   always @(posedge mclk_r1 or posedge puc_rst) begin
     if (puc_rst)        r1 <= 16'h0000;
     else if (r1_wr)     r1 <= reg_dest_val_in & 16'hfffe;
     else if (reg_sp_wr) r1 <= reg_sp_val      & 16'hfffe;
-    `ifdef CLOCK_GATING
     else                r1 <= reg_incr_val    & 16'hfffe;
-    `else
-    else if (r1_inc)    r1 <= reg_incr_val    & 16'hfffe;
-    `endif
   end
+  `else
+  always @(posedge mclk_r1 or posedge puc_rst) begin
+    if (puc_rst)        r1 <= 16'h0000;
+    else if (r1_wr)     r1 <= reg_dest_val_in & 16'hfffe;
+    else if (reg_sp_wr) r1 <= reg_sp_val      & 16'hfffe;
+    else if (r1_inc)    r1 <= reg_incr_val    & 16'hfffe;
+  end
+  `endif
 
   // R2: Status register
   //---------------------
@@ -256,14 +261,17 @@ module  omsp_register_file (
   wire       mclk_r3 = mclk;
   `endif
 
+  `ifdef CLOCK_GATING
   always @(posedge mclk_r3 or posedge puc_rst) begin
     if (puc_rst)     r3 <= 16'h0000;
-    `ifdef CLOCK_GATING
     else             r3 <= reg_dest_val_in;
-    `else
-    else if (r3_wr)  r3 <= reg_dest_val_in;
-    `endif
   end
+  `else
+  always @(posedge mclk_r3 or posedge puc_rst) begin
+    if (puc_rst)     r3 <= 16'h0000;
+    else if (r3_wr)  r3 <= reg_dest_val_in;
+  end
+  `endif
 
   //=============================================================================
   // 4)  GENERAL PURPOSE REGISTERS (R4...R15)
@@ -288,15 +296,19 @@ module  omsp_register_file (
   wire       mclk_r4 = mclk;
   `endif
 
+  `ifdef CLOCK_GATING
   always @(posedge mclk_r4 or posedge puc_rst) begin
     if (puc_rst)      r4  <= 16'h0000;
     else if (r4_wr)   r4  <= reg_dest_val_in;
-    `ifdef CLOCK_GATING
     else              r4  <= reg_incr_val;
-    `else
-    else if (r4_inc)  r4  <= reg_incr_val;
-    `endif
   end
+  `else
+  always @(posedge mclk_r4 or posedge puc_rst) begin
+    if (puc_rst)      r4  <= 16'h0000;
+    else if (r4_wr)   r4  <= reg_dest_val_in;
+    else if (r4_inc)  r4  <= reg_incr_val;
+  end
+  `endif
 
   // R5
   //------------
@@ -317,15 +329,19 @@ module  omsp_register_file (
   wire       mclk_r5 = mclk;
   `endif
 
+  `ifdef CLOCK_GATING
   always @(posedge mclk_r5 or posedge puc_rst) begin
     if (puc_rst)      r5  <= 16'h0000;
     else if (r5_wr)   r5  <= reg_dest_val_in;
-    `ifdef CLOCK_GATING
     else              r5  <= reg_incr_val;
-    `else
-    else if (r5_inc)  r5  <= reg_incr_val;
-    `endif
   end
+  `else
+  always @(posedge mclk_r5 or posedge puc_rst) begin
+    if (puc_rst)      r5  <= 16'h0000;
+    else if (r5_wr)   r5  <= reg_dest_val_in;
+    else if (r5_inc)  r5  <= reg_incr_val;
+  end
+  `endif
 
   // R6
   //------------
@@ -346,15 +362,19 @@ module  omsp_register_file (
   wire       mclk_r6 = mclk;
   `endif
 
+  `ifdef CLOCK_GATING
   always @(posedge mclk_r6 or posedge puc_rst) begin
     if (puc_rst)      r6  <= 16'h0000;
     else if (r6_wr)   r6  <= reg_dest_val_in;
-    `ifdef CLOCK_GATING
     else              r6  <= reg_incr_val;
-    `else
-    else if (r6_inc)  r6  <= reg_incr_val;
-    `endif
   end
+  `else
+  always @(posedge mclk_r6 or posedge puc_rst) begin
+    if (puc_rst)      r6  <= 16'h0000;
+    else if (r6_wr)   r6  <= reg_dest_val_in;
+    else if (r6_inc)  r6  <= reg_incr_val;
+  end
+  `endif
 
   // R7
   //------------
@@ -375,15 +395,19 @@ module  omsp_register_file (
   wire       mclk_r7 = mclk;
   `endif
 
+  `ifdef CLOCK_GATING
   always @(posedge mclk_r7 or posedge puc_rst) begin
     if (puc_rst)      r7  <= 16'h0000;
     else if (r7_wr)   r7  <= reg_dest_val_in;
-    `ifdef CLOCK_GATING
     else              r7  <= reg_incr_val;
-    `else
-    else if (r7_inc)  r7  <= reg_incr_val;
-    `endif
   end
+  `else
+  always @(posedge mclk_r7 or posedge puc_rst) begin
+    if (puc_rst)      r7  <= 16'h0000;
+    else if (r7_wr)   r7  <= reg_dest_val_in;
+    else if (r7_inc)  r7  <= reg_incr_val;
+  end
+  `endif
 
   // R8
   //------------
@@ -404,15 +428,19 @@ module  omsp_register_file (
   wire       mclk_r8 = mclk;
   `endif
 
+  `ifdef CLOCK_GATING
   always @(posedge mclk_r8 or posedge puc_rst) begin
     if (puc_rst)      r8  <= 16'h0000;
     else if (r8_wr)   r8  <= reg_dest_val_in;
-    `ifdef CLOCK_GATING
     else              r8  <= reg_incr_val;
-    `else
-    else if (r8_inc)  r8  <= reg_incr_val;
-    `endif
   end
+  `else
+  always @(posedge mclk_r8 or posedge puc_rst) begin
+    if (puc_rst)      r8  <= 16'h0000;
+    else if (r8_wr)   r8  <= reg_dest_val_in;
+    else if (r8_inc)  r8  <= reg_incr_val;
+  end
+  `endif
 
   // R9
   //------------
@@ -433,15 +461,19 @@ module  omsp_register_file (
   wire       mclk_r9 = mclk;
   `endif
 
+  `ifdef CLOCK_GATING
   always @(posedge mclk_r9 or posedge puc_rst) begin
     if (puc_rst)      r9  <= 16'h0000;
     else if (r9_wr)   r9  <= reg_dest_val_in;
-    `ifdef CLOCK_GATING
     else              r9  <= reg_incr_val;
-    `else
-    else if (r9_inc)  r9  <= reg_incr_val;
-    `endif
   end
+  `else
+  always @(posedge mclk_r9 or posedge puc_rst) begin
+    if (puc_rst)      r9  <= 16'h0000;
+    else if (r9_wr)   r9  <= reg_dest_val_in;
+    else if (r9_inc)  r9  <= reg_incr_val;
+  end
+  `endif
 
   // R10
   //------------
@@ -462,15 +494,19 @@ module  omsp_register_file (
   wire       mclk_r10 = mclk;
   `endif
 
+  `ifdef CLOCK_GATING
   always @(posedge mclk_r10 or posedge puc_rst) begin
     if (puc_rst)      r10 <= 16'h0000;
     else if (r10_wr)  r10 <= reg_dest_val_in;
-    `ifdef CLOCK_GATING
     else              r10 <= reg_incr_val;
-    `else
-    else if (r10_inc) r10 <= reg_incr_val;
-    `endif
   end
+  `else
+  always @(posedge mclk_r10 or posedge puc_rst) begin
+    if (puc_rst)      r10 <= 16'h0000;
+    else if (r10_wr)  r10 <= reg_dest_val_in;
+    else if (r10_inc) r10 <= reg_incr_val;
+  end
+  `endif
 
   // R11
   //------------
@@ -491,15 +527,19 @@ module  omsp_register_file (
   wire       mclk_r11 = mclk;
   `endif
 
+  `ifdef CLOCK_GATING
   always @(posedge mclk_r11 or posedge puc_rst) begin
     if (puc_rst)      r11 <= 16'h0000;
     else if (r11_wr)  r11 <= reg_dest_val_in;
-    `ifdef CLOCK_GATING
     else              r11 <= reg_incr_val;
-    `else
-    else if (r11_inc) r11 <= reg_incr_val;
-    `endif
   end
+  `else
+  always @(posedge mclk_r11 or posedge puc_rst) begin
+    if (puc_rst)      r11 <= 16'h0000;
+    else if (r11_wr)  r11 <= reg_dest_val_in;
+    else if (r11_inc) r11 <= reg_incr_val;
+  end
+  `endif
 
   // R12
   //------------
@@ -520,15 +560,19 @@ module  omsp_register_file (
   wire       mclk_r12 = mclk;
   `endif
 
+  `ifdef CLOCK_GATING
   always @(posedge mclk_r12 or posedge puc_rst) begin
     if (puc_rst)      r12 <= 16'h0000;
     else if (r12_wr)  r12 <= reg_dest_val_in;
-    `ifdef CLOCK_GATING
     else              r12 <= reg_incr_val;
-    `else
-    else if (r12_inc) r12 <= reg_incr_val;
-    `endif
   end
+  `else
+  always @(posedge mclk_r12 or posedge puc_rst) begin
+    if (puc_rst)      r12 <= 16'h0000;
+    else if (r12_wr)  r12 <= reg_dest_val_in;
+    else if (r12_inc) r12 <= reg_incr_val;
+  end
+  `endif
 
   // R13
   //------------
@@ -549,15 +593,19 @@ module  omsp_register_file (
   wire       mclk_r13 = mclk;
   `endif
 
+  `ifdef CLOCK_GATING
   always @(posedge mclk_r13 or posedge puc_rst) begin
     if (puc_rst)      r13 <= 16'h0000;
     else if (r13_wr)  r13 <= reg_dest_val_in;
-    `ifdef CLOCK_GATING
     else              r13 <= reg_incr_val;
-    `else
-    else if (r13_inc) r13 <= reg_incr_val;
-    `endif
   end
+  `else
+  always @(posedge mclk_r13 or posedge puc_rst) begin
+    if (puc_rst)      r13 <= 16'h0000;
+    else if (r13_wr)  r13 <= reg_dest_val_in;
+    else if (r13_inc) r13 <= reg_incr_val;
+  end
+  `endif
 
   // R14
   //------------
@@ -578,15 +626,19 @@ module  omsp_register_file (
   wire       mclk_r14 = mclk;
   `endif
 
+  `ifdef CLOCK_GATING
   always @(posedge mclk_r14 or posedge puc_rst) begin
     if (puc_rst)      r14 <= 16'h0000;
     else if (r14_wr)  r14 <= reg_dest_val_in;
-    `ifdef CLOCK_GATING
     else              r14 <= reg_incr_val;
-    `else
-    else if (r14_inc) r14 <= reg_incr_val;
-    `endif
   end
+  `else
+  always @(posedge mclk_r14 or posedge puc_rst) begin
+    if (puc_rst)      r14 <= 16'h0000;
+    else if (r14_wr)  r14 <= reg_dest_val_in;
+    else if (r14_inc) r14 <= reg_incr_val;
+  end
+  `endif
 
   // R15
   //------------
@@ -607,15 +659,19 @@ module  omsp_register_file (
   wire       mclk_r15 = mclk;
   `endif
 
+  `ifdef CLOCK_GATING
   always @(posedge mclk_r15 or posedge puc_rst) begin
     if (puc_rst)      r15 <= 16'h0000;
     else if (r15_wr)  r15 <= reg_dest_val_in;
-    `ifdef CLOCK_GATING
     else              r15 <= reg_incr_val;
-    `else
-    else if (r15_inc)  r15 <= reg_incr_val;
-    `endif
   end
+  `else
+  always @(posedge mclk_r15 or posedge puc_rst) begin
+    if (puc_rst)      r15 <= 16'h0000;
+    else if (r15_wr)  r15 <= reg_dest_val_in;
+    else if (r15_inc)  r15 <= reg_incr_val;
+  end
+  `endif
 
   //=============================================================================
   // 5)  READ MUX
