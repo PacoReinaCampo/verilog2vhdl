@@ -1,29 +1,31 @@
-cd test/openmsp430
+cd test/msp430
 
-rm -f omsp_alu.vhd
-rm -f omsp_and_gate.vhd
-rm -f omsp_clock_gate.vhd
-rm -f omsp_clock_module.vhd
-rm -f omsp_clock_mux.vhd
-rm -f omsp_dbg_hwbrk.vhd
-rm -f omsp_dbg_i2c.vhd
-rm -f omsp_dbg_uart.vhd
-rm -f omsp_dbg.vhd
-rm -f omsp_execution_unit.vhd
-rm -f omsp_frontend.vhd
-rm -f omsp_mem_backbone.vhd
-rm -f omsp_multiplier.vhd
-rm -f omsp_register_file.vhd
-rm -f omsp_scan_mux.vhd
-rm -f omsp_sfr.vhd
-rm -f omsp_sync_cell.vhd
-rm -f omsp_sync_reset.vhd
-rm -f omsp_wakeup_cell.vhd
-rm -f omsp_watchdog.vhd
-rm -f openMSP430_defines.vhd
-rm -f openMSP430.vhd
-rm -f periph/omsp_gpio.vhd
-rm -f periph/omsp_timerA_defines.vhd
-rm -f periph/omsp_timerA.vhd
-rm -f periph/template_periph_16b.vhd
-rm -f periph/template_periph_8b.vhd
+rm -rf core/fuse/omsp_and_gate.vhd
+rm -rf core/fuse/omsp_clock_gate.vhd
+rm -rf core/fuse/omsp_clock_mux.vhd
+rm -rf core/fuse/omsp_scan_mux.vhd
+rm -rf core/fuse/omsp_sync_cell.vhd
+rm -rf core/fuse/omsp_sync_reset.vhd
+rm -rf core/fuse/omsp_wakeup_cell.vhd
+rm -rf core/main/BCM.vhd
+rm -rf core/main/DBG.vhd
+rm -rf core/main/EXECUTION.vhd
+rm -rf core/main/FRONTEND.vhd
+rm -rf core/main/GPIO.vhd
+rm -rf core/main/MEMORY.vhd
+rm -rf core/main/MULTIPLIER.vhd
+rm -rf core/main/SFR.vhd
+rm -rf core/main/T_A.vhd
+rm -rf core/main/T_WATCHDOG.vhd
+rm -rf core/main/TEMPLATE_08.vhd
+rm -rf core/main/TEMPLATE_16.vhd
+rm -rf core/main/UART.vhd
+rm -rf core/omsp/omsp_alu.vhd
+rm -rf core/omsp/omsp_dbg_hwbrk.vhd
+rm -rf core/omsp/omsp_dbg_i2c.vhd
+rm -rf core/omsp/omsp_dbg_uart.vhd
+rm -rf core/omsp/omsp_register_file.vhd
+
+rm -rf core/MSP430_CORE.vhd
+
+rm -rf pkg/openMSP430_defines.vhd
