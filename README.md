@@ -1,8 +1,8 @@
-# HDL WIKI
-
-## Definition
+# 1. INTRODUCTION
 
 A Hardware Description Language (HDL) is a specialized computer language used to describe the structure and behavior of digital logic circuits. It allows for the synthesis of a HDL into a netlist, which can then be synthesized, placed and routed to produce the set of masks used to create an integrated circuit.
+
+# 2. PROJECTS
 
 * .1. module_definitions
 * .1.1. module_items
@@ -54,8 +54,7 @@ A Hardware Description Language (HDL) is a specialized computer language used to
 * .15. configurations
 * .16. synthesis_supported_constructs
 
-
-## Install
+# 3. WORKFLOW
 
 ```
 source INSTALL-IT
@@ -63,4 +62,64 @@ source INSTALL-IT
 cd test
 source TEST-MSP430-IT
 source TEST-RISCV-IT
+```
+
+# 4. CONCLUSION
+
+## 4.1. FOR WINDOWS USERS!
+
+1. Settings → Apps → Apps & features → Related settings, Programs and
+Features → Turn Windows features on or off → Windows Subsystem for
+Linux
+
+2. Microsoft Store → INSTALL UBUNTU
+
+Library
+type:
+```
+sudo apt update
+sudo apt upgrade
+
+sudo apt install bison cmake flex freeglut3-dev libcairo2-dev libgsl-dev \
+libncurses-dev libx11-dev m4 python-tk python3-tk swig tcl tcl-dev tk-dev tcsh
+```
+
+### 4.1.1. Front-End
+
+type:
+```
+sudo apt install verilator
+sudo apt install iverilog
+sudo apt install ghdl
+
+cd /mnt/c/../sim/verilog/regression/wb/iverilog
+source SIMULATE-IT
+```
+
+```
+sudo apt install yosys
+
+cd /mnt/c/../synthesis/yosys
+source SYNTHESIZE-IT
+```
+
+### 4.1.2. Back-End
+
+type:
+```
+mkdir qflow
+cd qflow
+
+git clone https://github.com/RTimothyEdwards/magic
+git clone https://github.com/rubund/graywolf
+git clone https://github.com/The-OpenROAD-Project/OpenSTA
+git clone https://github.com/RTimothyEdwards/qrouter
+git clone https://github.com/RTimothyEdwards/irsim
+git clone https://github.com/RTimothyEdwards/netgen
+git clone https://github.com/RTimothyEdwards/qflow
+```
+
+```
+cd /mnt/c/../synthesis/qflow
+source FLOW-IT
 ```
