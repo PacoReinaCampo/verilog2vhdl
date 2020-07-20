@@ -1,48 +1,57 @@
-//----------------------------------------------------------------------------
-// Copyright (C) 2009 , Olivier Girard
-//
-// Redistribution and use in source and binary forms, with or without
-// modification, are permitted provided that the following conditions
-// are met:
-//     * Redistributions of source code must retain the above copyright
-//       notice, this list of conditions and the following disclaimer.
-//     * Redistributions in binary form must reproduce the above copyright
-//       notice, this list of conditions and the following disclaimer in the
-//       documentation and/or other materials provided with the distribution.
-//     * Neither the name of the authors nor the names of its contributors
-//       may be used to endorse or promote products derived from this software
-//       without specific prior written permission.
-//
-// THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
-// AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
-// IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
-// ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
-// LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY,
-// OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
-// SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
-// INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
-// CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
-// ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF
-// THE POSSIBILITY OF SUCH DAMAGE
-//
-//----------------------------------------------------------------------------
-//
-// *File Name: FRONTEND.v
-// 
-// *Module Description:
-//                       openMSP430 Instruction fetch and decode unit
-//
-// *Author(s):
-//              - Olivier Girard,    olgirard@gmail.com
-//
-//----------------------------------------------------------------------------
+////////////////////////////////////////////////////////////////////////////////
+//                                            __ _      _     _               //
+//                                           / _(_)    | |   | |              //
+//                __ _ _   _  ___  ___ _ __ | |_ _  ___| | __| |              //
+//               / _` | | | |/ _ \/ _ \ '_ \|  _| |/ _ \ |/ _` |              //
+//              | (_| | |_| |  __/  __/ | | | | | |  __/ | (_| |              //
+//               \__, |\__,_|\___|\___|_| |_|_| |_|\___|_|\__,_|              //
+//                  | |                                                       //
+//                  |_|                                                       //
+//                                                                            //
+//                                                                            //
+//              MSP430 CPU                                                    //
+//              Processing Unit                                               //
+//                                                                            //
+////////////////////////////////////////////////////////////////////////////////
+
+/* Copyright (c) 2015-2016 by the author(s)
+ *
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions
+ * are met:
+ *     * Redistributions of source code must retain the above copyright
+ *       notice, this list of conditions and the following disclaimer.
+ *     * Redistributions in binary form must reproduce the above copyright
+ *       notice, this list of conditions and the following disclaimer in the
+ *       documentation and/or other materials provided with the distribution.
+ *     * Neither the name of the authors nor the names of its contributors
+ *       may be used to endorse or promote products derived from this software
+ *       without specific prior written permission.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+ * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+ * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+ * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
+ * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY,
+ * OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+ * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+ * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+ * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+ * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF
+ * THE POSSIBILITY OF SUCH DAMAGE
+ *
+ * =============================================================================
+ * Author(s):
+ *   Olivier Girard <olgirard@gmail.com>
+ *   Paco Reina Campo <pacoreinacampo@queenfield.tech>
+ */
 
 `ifdef OMSP_NO_INCLUDE
 `else
-`include "openMSP430_defines.v"
+`include "msp430_defines.sv"
 `endif
 
-module  FRONTEND (
+module  msp430_frontend (
   // OUTPUTs
   output reg           dbg_halt_st,   // Halt/Run status from CPU
   output               decode_noirq,  // Frontend decode instruction
@@ -250,7 +259,7 @@ module  FRONTEND (
   `ifdef CLOCK_GATING
   wire       mclk_irq_num;
 
-  omsp_clock_gate clock_gate_irq_num (
+  msp430_clock_gate clock_gate_irq_num (
     .gclk(mclk_irq_num),
     .clk (mclk),
     .enable(irq_detect),
@@ -262,13 +271,13 @@ module  FRONTEND (
 
   // Combine all IRQs
   `ifdef  IRQ_16
-  assign      irq_all     = {nmi_pnd, irq, 48'h0000_0000_0000} | {1'b0,    3'h0, wdt_irq, {58{1'b0}}};
+  wire [62:0] irq_all     = {nmi_pnd, irq, 48'h0000_0000_0000} | {1'b0,    3'h0, wdt_irq, {58{1'b0}}};
   `else
   `ifdef  IRQ_32
-  assign      irq_all     = {nmi_pnd, irq, 32'h0000_0000}      | {1'b0,    3'h0, wdt_irq, {58{1'b0}}};
+  wire [62:0] irq_all     = {nmi_pnd, irq, 32'h0000}           | {1'b0,    3'h0, wdt_irq, {58{1'b0}}};
   `else
   `ifdef  IRQ_64
-  assign      irq_all     = {nmi_pnd, irq}                     | {1'b0,    3'h0, wdt_irq, {58{1'b0}}};
+  wire [62:0] irq_all     = {nmi_pnd, irq}                     | {1'b0,    3'h0, wdt_irq, {58{1'b0}}};
   `endif
   `endif
   `endif
@@ -310,10 +319,10 @@ module  FRONTEND (
 
   // Wakeup condition from maskable interrupts
   wire mirq_wkup;
-  omsp_and_gate and_mirq_wkup (.y(mirq_wkup), .a(wkup | wdt_wkup), .b(gie));
+  msp430_and_gate and_mirq_wkup (.y(mirq_wkup), .a(wkup | wdt_wkup), .b(gie));
 
   // Combined asynchronous wakeup detection from nmi & irq (masked if the cpu is disabled)
-  omsp_and_gate and_mclk_wkup (.y(mclk_wkup), .a(nmi_wkup | mirq_wkup), .b(cpu_en_s));
+  msp430_and_gate and_mclk_wkup (.y(mclk_wkup), .a(nmi_wkup | mirq_wkup), .b(cpu_en_s));
   `else
 
   // In the CPUOFF feature is disabled, the wake-up and enable signals are always 1
@@ -345,7 +354,7 @@ module  FRONTEND (
 
   wire       mclk_pc;
 
-  omsp_clock_gate clock_gate_pc (
+  msp430_clock_gate clock_gate_pc (
     .gclk(mclk_pc),
     .clk (mclk),
     .enable(pc_en),
@@ -400,7 +409,7 @@ module  FRONTEND (
 
   wire       mclk_inst_sext;
 
-  omsp_clock_gate clock_gate_inst_sext (
+  msp430_clock_gate clock_gate_inst_sext (
     .gclk(mclk_inst_sext),
     .clk (mclk),
     .enable(inst_sext_en),
@@ -435,7 +444,7 @@ module  FRONTEND (
                               (i_state==I_EXT2);
   wire       mclk_inst_dext;
 
-  omsp_clock_gate clock_gate_inst_dext (
+  msp430_clock_gate clock_gate_inst_dext (
     .gclk(mclk_inst_dext),
     .clk (mclk),
     .enable(inst_dext_en),
@@ -469,7 +478,7 @@ module  FRONTEND (
   `ifdef CLOCK_GATING
   wire       mclk_decode;
 
-  omsp_clock_gate clock_gate_decode (
+  msp430_clock_gate clock_gate_decode (
     .gclk(mclk_decode),
     .clk (mclk),
     .enable(decode),
@@ -574,11 +583,11 @@ module  FRONTEND (
   // 12'b000000010000: SUB
   // 12'b000000100000: CMP
   // 12'b000001000000: DADD
-  // 12'b000010000000: BIT
+  // 12'b000010000000: BITC
   // 12'b000100000000: BIC
   // 12'b001000000000: BIS
-  // 12'b010000000000: XOR
-  // 12'b100000000000: AND
+  // 12'b010000000000: XORX
+  // 12'b100000000000: ANDX
 
   wire [15:0] inst_to_1hot = one_hot16(ir[15:12]) & {16{inst_type_nxt[`INST_TO]}};
   wire [11:0] inst_to_nxt  = inst_to_1hot[15:4];
@@ -980,6 +989,7 @@ module  FRONTEND (
                                alu_inc_c,
                                alu_inc,
                                alu_src_inv};
+
   `ifdef CLOCK_GATING
   always @(posedge mclk_decode or posedge puc_rst) begin
     if (puc_rst)     inst_alu <= 12'h000;
@@ -991,8 +1001,8 @@ module  FRONTEND (
     else if (decode) inst_alu <= inst_alu_nxt;
   end
   `endif
-endmodule // FRONTEND
+endmodule // msp430_frontend
 `ifdef OMSP_NO_INCLUDE
 `else
-`include "openMSP430_undefines.v"
+`include "msp430_undefines.sv"
 `endif

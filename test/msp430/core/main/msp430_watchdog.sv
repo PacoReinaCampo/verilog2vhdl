@@ -1,48 +1,57 @@
-//----------------------------------------------------------------------------
-// Copyright (C) 2009 , Olivier Girard
-//
-// Redistribution and use in source and binary forms, with or without
-// modification, are permitted provided that the following conditions
-// are met:
-//     * Redistributions of source code must retain the above copyright
-//       notice, this list of conditions and the following disclaimer.
-//     * Redistributions in binary form must reproduce the above copyright
-//       notice, this list of conditions and the following disclaimer in the
-//       documentation and/or other materials provided with the distribution.
-//     * Neither the name of the authors nor the names of its contributors
-//       may be used to endorse or promote products derived from this software
-//       without specific prior written permission.
-//
-// THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
-// AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
-// IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
-// ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
-// LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY,
-// OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
-// SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
-// INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
-// CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
-// ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF
-// THE POSSIBILITY OF SUCH DAMAGE
-//
-//----------------------------------------------------------------------------
-//
-// *File Name: T_WATCHDOG.v
-// 
-// *Module Description:
-//                       Watchdog Timer
-//
-// *Author(s):
-//              - Olivier Girard,    olgirard@gmail.com
-//
-//----------------------------------------------------------------------------
+////////////////////////////////////////////////////////////////////////////////
+//                                            __ _      _     _               //
+//                                           / _(_)    | |   | |              //
+//                __ _ _   _  ___  ___ _ __ | |_ _  ___| | __| |              //
+//               / _` | | | |/ _ \/ _ \ '_ \|  _| |/ _ \ |/ _` |              //
+//              | (_| | |_| |  __/  __/ | | | | | |  __/ | (_| |              //
+//               \__, |\__,_|\___|\___|_| |_|_| |_|\___|_|\__,_|              //
+//                  | |                                                       //
+//                  |_|                                                       //
+//                                                                            //
+//                                                                            //
+//              MSP430 CPU                                                    //
+//              Processing Unit                                               //
+//                                                                            //
+////////////////////////////////////////////////////////////////////////////////
+
+/* Copyright (c) 2015-2016 by the author(s)
+ *
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions
+ * are met:
+ *     * Redistributions of source code must retain the above copyright
+ *       notice, this list of conditions and the following disclaimer.
+ *     * Redistributions in binary form must reproduce the above copyright
+ *       notice, this list of conditions and the following disclaimer in the
+ *       documentation and/or other materials provided with the distribution.
+ *     * Neither the name of the authors nor the names of its contributors
+ *       may be used to endorse or promote products derived from this software
+ *       without specific prior written permission.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+ * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+ * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+ * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
+ * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY,
+ * OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+ * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+ * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+ * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+ * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF
+ * THE POSSIBILITY OF SUCH DAMAGE
+ *
+ * =============================================================================
+ * Author(s):
+ *   Olivier Girard <olgirard@gmail.com>
+ *   Paco Reina Campo <pacoreinacampo@queenfield.tech>
+ */
 
 `ifdef OMSP_NO_INCLUDE
 `else
-`include "openMSP430_defines.v"
+`include "msp430_defines.sv"
 `endif
 
-module  T_WATCHDOG (
+module  msp430_watchdog (
   // OUTPUTs
   output       [15:0] per_dout,       // Peripheral data output
   output              wdt_irq,        // Watchdog-timer interrupt
@@ -127,7 +136,7 @@ module  T_WATCHDOG (
 
   `ifdef CLOCK_GATING
   wire       mclk_wdtctl;
-  omsp_clock_gate clock_gate_wdtctl (
+  msp430_clock_gate clock_gate_wdtctl (
     .gclk(mclk_wdtctl),
     .clk (mclk),
     .enable(wdtctl_wr),
@@ -205,7 +214,7 @@ module  T_WATCHDOG (
   wire wdt_clk;
 
   `ifdef WATCHDOG_MUX
-  omsp_clock_mux clock_mux_watchdog (
+  msp430_clock_mux clock_mux_watchdog (
     .clk_out   (wdt_clk),
     .clk_in0   (smclk),
     .clk_in1   (aclk),
@@ -228,14 +237,14 @@ module  T_WATCHDOG (
   wire wdt_rst;
 
   // Reset Synchronizer
-  omsp_sync_reset sync_reset_por (
+  msp430_sync_reset sync_reset_por (
     .rst_s        (wdt_rst_noscan),
     .clk          (wdt_clk),
     .rst_a        (puc_rst)
   );
 
   // Scan Reset Mux
-  omsp_scan_mux scan_mux_wdt_rst (
+  msp430_scan_mux scan_mux_wdt_rst (
     .scan_mode    (scan_mode),
     .data_in_scan (puc_rst),
     .data_in_func (wdt_rst_noscan),
@@ -255,7 +264,7 @@ module  T_WATCHDOG (
 
   // Synchronization
   wire wdtcnt_clr_sync;
-  omsp_sync_cell sync_cell_wdtcnt_clr (
+  msp430_sync_cell sync_cell_wdtcnt_clr (
     .data_out  (wdtcnt_clr_sync),
     .data_in   (wdtcnt_clr_toggle),
     .clk       (wdt_clk),
@@ -276,7 +285,7 @@ module  T_WATCHDOG (
   //----------------------------------------------
   wire wdtcnt_incr;
 
-  omsp_sync_cell sync_cell_wdtcnt_incr (
+  msp430_sync_cell sync_cell_wdtcnt_incr (
     .data_out  (wdtcnt_incr),
     .data_in   (~wdtctl[7] & ~dbg_freeze),
     .clk       (wdt_clk),
@@ -292,7 +301,7 @@ module  T_WATCHDOG (
   `ifdef CLOCK_GATING
   wire       wdtcnt_en   = wdtcnt_clr | wdtcnt_incr;
   wire       wdt_clk_cnt;
-  omsp_clock_gate clock_gate_wdtcnt (
+  msp430_clock_gate clock_gate_wdtcnt (
     .gclk(wdt_clk_cnt),
     .clk (wdt_clk),
     .enable(wdtcnt_en),
@@ -363,7 +372,7 @@ module  T_WATCHDOG (
 
   // Synchronize in the MCLK domain
   wire       wdt_evt_toggle_sync;
-  omsp_sync_cell sync_cell_wdt_evt (
+  msp430_sync_cell sync_cell_wdt_evt (
     .data_out  (wdt_evt_toggle_sync),
     .data_in   (wdt_evt_toggle),
     .clk       (mclk),
@@ -399,7 +408,7 @@ module  T_WATCHDOG (
 
   // Watchdog wakeup cell
   wire wdt_wkup_pre;
-  omsp_wakeup_cell wakeup_cell_wdog (
+  msp430_wakeup_cell wakeup_cell_wdog (
     .wkup_out   (wdt_wkup_pre),    // Wakup signal (asynchronous)
     .scan_clk   (mclk),            // Scan clock
     .scan_mode  (scan_mode),       // Scan mode
@@ -418,7 +427,7 @@ module  T_WATCHDOG (
   end
 
   // Make wakeup when not enabled
-  omsp_and_gate and_wdt_wkup (
+  msp430_and_gate and_wdt_wkup (
     .y(wdt_wkup),
     .a(wdt_wkup_pre),
     .b(wdt_wkup_en)
@@ -512,9 +521,9 @@ module  T_WATCHDOG (
     else     wdt_reset <= wdtpw_error | (wdtifg_set & ~wdttmsel);
   end
   `endif
-endmodule // T_WATCHDOG
+endmodule // msp430_watchdog
 
 `ifdef OMSP_NO_INCLUDE
 `else
-`include "openMSP430_undefines.v"
+`include "msp430_undefines.sv"
 `endif

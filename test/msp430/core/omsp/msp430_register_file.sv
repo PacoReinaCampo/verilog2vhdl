@@ -1,48 +1,57 @@
-//----------------------------------------------------------------------------
-// Copyright (C) 2009 , Olivier Girard
-//
-// Redistribution and use in source and binary forms, with or without
-// modification, are permitted provided that the following conditions
-// are met:
-//     * Redistributions of source code must retain the above copyright
-//       notice, this list of conditions and the following disclaimer.
-//     * Redistributions in binary form must reproduce the above copyright
-//       notice, this list of conditions and the following disclaimer in the
-//       documentation and/or other materials provided with the distribution.
-//     * Neither the name of the authors nor the names of its contributors
-//       may be used to endorse or promote products derived from this software
-//       without specific prior written permission.
-//
-// THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
-// AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
-// IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
-// ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
-// LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY,
-// OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
-// SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
-// INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
-// CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
-// ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF
-// THE POSSIBILITY OF SUCH DAMAGE
-//
-//----------------------------------------------------------------------------
-//
-// *File Name: omsp_register_file.v
-// 
-// *Module Description:
-//                       openMSP430 Register files
-//
-// *Author(s):
-//              - Olivier Girard,    olgirard@gmail.com
-//
-//----------------------------------------------------------------------------
+////////////////////////////////////////////////////////////////////////////////
+//                                            __ _      _     _               //
+//                                           / _(_)    | |   | |              //
+//                __ _ _   _  ___  ___ _ __ | |_ _  ___| | __| |              //
+//               / _` | | | |/ _ \/ _ \ '_ \|  _| |/ _ \ |/ _` |              //
+//              | (_| | |_| |  __/  __/ | | | | | |  __/ | (_| |              //
+//               \__, |\__,_|\___|\___|_| |_|_| |_|\___|_|\__,_|              //
+//                  | |                                                       //
+//                  |_|                                                       //
+//                                                                            //
+//                                                                            //
+//              MSP430 CPU                                                    //
+//              Processing Unit                                               //
+//                                                                            //
+////////////////////////////////////////////////////////////////////////////////
+
+/* Copyright (c) 2015-2016 by the author(s)
+ *
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions
+ * are met:
+ *     * Redistributions of source code must retain the above copyright
+ *       notice, this list of conditions and the following disclaimer.
+ *     * Redistributions in binary form must reproduce the above copyright
+ *       notice, this list of conditions and the following disclaimer in the
+ *       documentation and/or other materials provided with the distribution.
+ *     * Neither the name of the authors nor the names of its contributors
+ *       may be used to endorse or promote products derived from this software
+ *       without specific prior written permission.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+ * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+ * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+ * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
+ * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY,
+ * OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+ * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+ * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+ * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+ * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF
+ * THE POSSIBILITY OF SUCH DAMAGE
+ *
+ * =============================================================================
+ * Author(s):
+ *   Olivier Girard <olgirard@gmail.com>
+ *   Paco Reina Campo <pacoreinacampo@queenfield.tech>
+ */
 
 `ifdef OMSP_NO_INCLUDE
 `else
-`include "openMSP430_defines.v"
+`include "msp430_defines.sv"
 `endif
 
-module  omsp_register_file (
+module  msp430_register_file (
   // OUTPUTs
   output       [15:0] r0,
   output reg   [15:0] r1,
@@ -128,7 +137,7 @@ module  omsp_register_file (
   wire       r1_en  = r1_wr | reg_sp_wr | r1_inc;
   wire       mclk_r1;
 
-  omsp_clock_gate clock_gate_r1 (
+  msp430_clock_gate clock_gate_r1 (
     .gclk(mclk_r1),
     .clk (mclk),
     .enable(r1_en),
@@ -172,7 +181,7 @@ module  omsp_register_file (
   wire        r2_en  = |alu_stat_wr | r2_wr | reg_sr_clr;
   wire        mclk_r2;
 
-  omsp_clock_gate clock_gate_r2 (
+  msp430_clock_gate clock_gate_r2 (
     .gclk(mclk_r2),
     .clk (mclk),
     .enable(r2_en),
@@ -251,7 +260,7 @@ module  omsp_register_file (
   wire       r3_en   = r3_wr;
   wire       mclk_r3;
 
-  omsp_clock_gate clock_gate_r3 (
+  msp430_clock_gate clock_gate_r3 (
     .gclk(mclk_r3),
     .clk (mclk),
     .enable(r3_en),
@@ -286,7 +295,7 @@ module  omsp_register_file (
   wire       r4_en  = r4_wr | r4_inc;
   wire       mclk_r4;
 
-  omsp_clock_gate clock_gate_r4 (
+  msp430_clock_gate clock_gate_r4 (
     .gclk(mclk_r4),
     .clk (mclk),
     .enable(r4_en),
@@ -319,7 +328,7 @@ module  omsp_register_file (
   wire       r5_en  = r5_wr | r5_inc;
   wire       mclk_r5;
 
-  omsp_clock_gate clock_gate_r5 (
+  msp430_clock_gate clock_gate_r5 (
     .gclk(mclk_r5),
     .clk (mclk),
     .enable(r5_en),
@@ -352,7 +361,7 @@ module  omsp_register_file (
   wire       r6_en  = r6_wr | r6_inc;
   wire       mclk_r6;
 
-  omsp_clock_gate clock_gate_r6 (
+  msp430_clock_gate clock_gate_r6 (
     .gclk(mclk_r6),
     .clk (mclk),
     .enable(r6_en),
@@ -385,7 +394,7 @@ module  omsp_register_file (
   wire       r7_en  = r7_wr | r7_inc;
   wire       mclk_r7;
 
-  omsp_clock_gate clock_gate_r7 (
+  msp430_clock_gate clock_gate_r7 (
     .gclk(mclk_r7),
     .clk (mclk),
     .enable(r7_en),
@@ -418,7 +427,7 @@ module  omsp_register_file (
   wire       r8_en  = r8_wr | r8_inc;
   wire       mclk_r8;
 
-  omsp_clock_gate clock_gate_r8 (
+  msp430_clock_gate clock_gate_r8 (
     .gclk(mclk_r8),
     .clk (mclk),
     .enable(r8_en),
@@ -451,7 +460,7 @@ module  omsp_register_file (
   wire       r9_en  = r9_wr | r9_inc;
   wire       mclk_r9;
 
-  omsp_clock_gate clock_gate_r9 (
+  msp430_clock_gate clock_gate_r9 (
     .gclk(mclk_r9),
     .clk (mclk),
     .enable(r9_en),
@@ -484,7 +493,7 @@ module  omsp_register_file (
   wire       r10_en  = r10_wr | r10_inc;
   wire       mclk_r10;
 
-  omsp_clock_gate clock_gate_r10 (
+  msp430_clock_gate clock_gate_r10 (
     .gclk(mclk_r10),
     .clk (mclk),
     .enable(r10_en),
@@ -517,7 +526,7 @@ module  omsp_register_file (
   wire       r11_en  = r11_wr | r11_inc;
   wire       mclk_r11;
 
-  omsp_clock_gate clock_gate_r11 (
+  msp430_clock_gate clock_gate_r11 (
     .gclk(mclk_r11),
     .clk (mclk),
     .enable(r11_en),
@@ -550,7 +559,7 @@ module  omsp_register_file (
   wire       r12_en  = r12_wr | r12_inc;
   wire       mclk_r12;
 
-  omsp_clock_gate clock_gate_r12 (
+  msp430_clock_gate clock_gate_r12 (
     .gclk(mclk_r12),
     .clk (mclk),
     .enable(r12_en),
@@ -583,7 +592,7 @@ module  omsp_register_file (
   wire       r13_en  = r13_wr | r13_inc;
   wire       mclk_r13;
 
-  omsp_clock_gate clock_gate_r13 (
+  msp430_clock_gate clock_gate_r13 (
     .gclk(mclk_r13),
     .clk (mclk),
     .enable(r13_en),
@@ -616,7 +625,7 @@ module  omsp_register_file (
   wire       r14_en  = r14_wr | r14_inc;
   wire       mclk_r14;
 
-  omsp_clock_gate clock_gate_r14 (
+  msp430_clock_gate clock_gate_r14 (
     .gclk(mclk_r14),
     .clk (mclk),
     .enable(r14_en),
@@ -649,7 +658,7 @@ module  omsp_register_file (
   wire       r15_en  = r15_wr | r15_inc;
   wire       mclk_r15;
 
-  omsp_clock_gate clock_gate_r15 (
+  msp430_clock_gate clock_gate_r15 (
     .gclk(mclk_r15),
     .clk (mclk),
     .enable(r15_en),
@@ -710,9 +719,9 @@ module  omsp_register_file (
                     (r13     & {16{inst_dest[13]}}) | 
                     (r14     & {16{inst_dest[14]}}) | 
                     (r15     & {16{inst_dest[15]}});
-endmodule // omsp_register_file
+endmodule // msp430_register_file
 
 `ifdef OMSP_NO_INCLUDE
 `else
-`include "openMSP430_undefines.v"
+`include "msp430_undefines.sv"
 `endif

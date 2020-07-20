@@ -1,48 +1,57 @@
-//----------------------------------------------------------------------------
-// Copyright (C) 2009 , Olivier Girard
-//
-// Redistribution and use in source and binary forms, with or without
-// modification, are permitted provided that the following conditions
-// are met:
-//     * Redistributions of source code must retain the above copyright
-//       notice, this list of conditions and the following disclaimer.
-//     * Redistributions in binary form must reproduce the above copyright
-//       notice, this list of conditions and the following disclaimer in the
-//       documentation and/or other materials provided with the distribution.
-//     * Neither the name of the authors nor the names of its contributors
-//       may be used to endorse or promote products derived from this software
-//       without specific prior written permission.
-//
-// THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
-// AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
-// IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
-// ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
-// LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY,
-// OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
-// SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
-// INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
-// CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
-// ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF
-// THE POSSIBILITY OF SUCH DAMAGE
-//
-//----------------------------------------------------------------------------
-//
-// *File Name: BCM.v
-// 
-// *Module Description:
-//                       Basic clock module implementation.
-//
-// *Author(s):
-//              - Olivier Girard,    olgirard@gmail.com
-//
-//----------------------------------------------------------------------------
+////////////////////////////////////////////////////////////////////////////////
+//                                            __ _      _     _               //
+//                                           / _(_)    | |   | |              //
+//                __ _ _   _  ___  ___ _ __ | |_ _  ___| | __| |              //
+//               / _` | | | |/ _ \/ _ \ '_ \|  _| |/ _ \ |/ _` |              //
+//              | (_| | |_| |  __/  __/ | | | | | |  __/ | (_| |              //
+//               \__, |\__,_|\___|\___|_| |_|_| |_|\___|_|\__,_|              //
+//                  | |                                                       //
+//                  |_|                                                       //
+//                                                                            //
+//                                                                            //
+//              MSP430 CPU                                                    //
+//              Processing Unit                                               //
+//                                                                            //
+////////////////////////////////////////////////////////////////////////////////
+
+/* Copyright (c) 2015-2016 by the author(s)
+ *
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions
+ * are met:
+ *     * Redistributions of source code must retain the above copyright
+ *       notice, this list of conditions and the following disclaimer.
+ *     * Redistributions in binary form must reproduce the above copyright
+ *       notice, this list of conditions and the following disclaimer in the
+ *       documentation and/or other materials provided with the distribution.
+ *     * Neither the name of the authors nor the names of its contributors
+ *       may be used to endorse or promote products derived from this software
+ *       without specific prior written permission.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+ * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+ * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+ * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
+ * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY,
+ * OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+ * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+ * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+ * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+ * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF
+ * THE POSSIBILITY OF SUCH DAMAGE
+ *
+ * =============================================================================
+ * Author(s):
+ *   Olivier Girard <olgirard@gmail.com>
+ *   Paco Reina Campo <pacoreinacampo@queenfield.tech>
+ */
 
 `ifdef OMSP_NO_INCLUDE
 `else
-`include "openMSP430_defines.v"
+`include "msp430_defines.sv"
 `endif
 
-module  BCM (
+module  msp430_bcm (
   // OUTPUTs
   output              aclk,         // ACLK
   output              aclk_en,      // ACLK enable
@@ -217,7 +226,7 @@ module  BCM (
   `ifdef ASIC_CLOCKING
   wire cpuoff_and_mclk_enable;
 
-  omsp_and_gate and_cpuoff_mclk_en (.y(cpuoff_and_mclk_enable), .a(cpuoff), .b(mclk_enable));
+  msp430_and_gate and_cpuoff_mclk_en (.y(cpuoff_and_mclk_enable), .a(cpuoff), .b(mclk_enable));
   `endif
 
   //-----------------------------------------------------------
@@ -248,11 +257,11 @@ module  BCM (
   wire dco_disable_by_cpu_en;
   wire dco_enable_nxt;
 
-  omsp_and_gate and_dco_dis1 (.y(cpu_enabled_with_dco),   .a(~bcsctl2[`SELMx]),     .b(cpuoff_and_mclk_enable));
-  omsp_and_gate and_dco_dis2 (.y(dco_not_enabled_by_dbg), .a(~dbg_en_s),            .b(~cpu_enabled_with_dco));
-  omsp_and_gate and_dco_dis3 (.y(dco_disable_by_scg0),    .a(scg0),                 .b(dco_not_enabled_by_dbg));
-  omsp_and_gate and_dco_dis4 (.y(dco_disable_by_cpu_en),  .a(~cpu_en_s),            .b(~mclk_enable));
-  omsp_and_gate and_dco_dis5 (.y(dco_enable_nxt),         .a(~dco_disable_by_scg0), .b(~dco_disable_by_cpu_en));
+  msp430_and_gate and_dco_dis1 (.y(cpu_enabled_with_dco),   .a(~bcsctl2[`SELMx]),     .b(cpuoff_and_mclk_enable));
+  msp430_and_gate and_dco_dis2 (.y(dco_not_enabled_by_dbg), .a(~dbg_en_s),            .b(~cpu_enabled_with_dco));
+  msp430_and_gate and_dco_dis3 (.y(dco_disable_by_scg0),    .a(scg0),                 .b(dco_not_enabled_by_dbg));
+  msp430_and_gate and_dco_dis4 (.y(dco_disable_by_cpu_en),  .a(~cpu_en_s),            .b(~mclk_enable));
+  msp430_and_gate and_dco_dis5 (.y(dco_enable_nxt),         .a(~dco_disable_by_scg0), .b(~dco_disable_by_cpu_en));
 
   // Register to prevent glitch propagation
   reg  dco_disable;
@@ -265,7 +274,7 @@ module  BCM (
   // Note that a synchronizer is required if the MCLK mux is included
   wire dco_clk_n  = ~dco_clk;
   `ifdef MCLK_MUX
-  omsp_sync_cell sync_cell_dco_disable (
+  msp430_sync_cell sync_cell_dco_disable (
     .data_out  (dco_enable),
     .data_in   (~dco_disable),
     .clk       (dco_clk_n),
@@ -281,15 +290,15 @@ module  BCM (
   wire dco_mclk_wkup;
   wire dco_en_wkup;
 
-  omsp_and_gate and_dco_mclk_wkup (.y(dco_mclk_wkup), .a(mclk_wkup),   .b(~bcsctl2[`SELMx]));
-  omsp_and_gate and_dco_en_wkup   (.y(dco_en_wkup),   .a(~dco_enable), .b(dco_enable_nxt));
+  msp430_and_gate and_dco_mclk_wkup (.y(dco_mclk_wkup), .a(mclk_wkup),   .b(~bcsctl2[`SELMx]));
+  msp430_and_gate and_dco_en_wkup   (.y(dco_en_wkup),   .a(~dco_enable), .b(dco_enable_nxt));
 
   wire dco_wkup_set = dco_mclk_wkup | dco_en_wkup | cpu_en_wkup;
 
   // Scan MUX for the asynchronous SET
   wire dco_wkup_set_scan;
 
-  omsp_scan_mux scan_mux_dco_wkup (
+  msp430_scan_mux scan_mux_dco_wkup (
     .scan_mode    (scan_mode),
     .data_in_scan (por_a),
     .data_in_func (dco_wkup_set | por),
@@ -299,7 +308,7 @@ module  BCM (
   // Scan MUX to increase coverage 
   wire dco_wkup_clear;
 
-  omsp_scan_mux scan_mux_dco_wkup_clear (
+  msp430_scan_mux scan_mux_dco_wkup_clear (
     .scan_mode    (scan_mode),
     .data_in_scan (dco_wkup_set),
     .data_in_func (1'b1),
@@ -309,14 +318,14 @@ module  BCM (
   // The wakeup is asynchronously set, synchronously released
   wire dco_wkup_n;
 
-  omsp_sync_cell sync_cell_dco_wkup (
+  msp430_sync_cell sync_cell_dco_wkup (
     .data_out  (dco_wkup_n),
     .data_in   (dco_wkup_clear),
     .clk       (dco_clk_n),
     .rst       (dco_wkup_set_scan)
   );
 
-  omsp_and_gate and_dco_wkup (.y(dco_wkup), .a(~dco_wkup_n), .b(cpu_en));
+  msp430_and_gate and_dco_wkup (.y(dco_wkup), .a(~dco_wkup_n), .b(cpu_en));
   `else
   assign dco_enable    = 1'b1;
   assign dco_wkup      = 1'b1;
@@ -344,11 +353,11 @@ module  BCM (
   wire lfxt_disable_by_cpu_en;
   wire lfxt_enable_nxt;
 
-  omsp_and_gate and_lfxt_dis1 (.y(cpu_enabled_with_lfxt),   .a(bcsctl2[`SELMx]),         .b(cpuoff_and_mclk_enable));
-  omsp_and_gate and_lfxt_dis2 (.y(lfxt_not_enabled_by_dbg), .a(~dbg_en_s),               .b(~cpu_enabled_with_lfxt));
-  omsp_and_gate and_lfxt_dis3 (.y(lfxt_disable_by_oscoff),  .a(oscoff),                  .b(lfxt_not_enabled_by_dbg));
-  omsp_and_gate and_lfxt_dis4 (.y(lfxt_disable_by_cpu_en),  .a(~cpu_en_s),               .b(~mclk_enable));
-  omsp_and_gate and_lfxt_dis5 (.y(lfxt_enable_nxt),         .a(~lfxt_disable_by_oscoff), .b(~lfxt_disable_by_cpu_en));
+  msp430_and_gate and_lfxt_dis1 (.y(cpu_enabled_with_lfxt),   .a(bcsctl2[`SELMx]),         .b(cpuoff_and_mclk_enable));
+  msp430_and_gate and_lfxt_dis2 (.y(lfxt_not_enabled_by_dbg), .a(~dbg_en_s),               .b(~cpu_enabled_with_lfxt));
+  msp430_and_gate and_lfxt_dis3 (.y(lfxt_disable_by_oscoff),  .a(oscoff),                  .b(lfxt_not_enabled_by_dbg));
+  msp430_and_gate and_lfxt_dis4 (.y(lfxt_disable_by_cpu_en),  .a(~cpu_en_s),               .b(~mclk_enable));
+  msp430_and_gate and_lfxt_dis5 (.y(lfxt_enable_nxt),         .a(~lfxt_disable_by_oscoff), .b(~lfxt_disable_by_cpu_en));
 
   // Register to prevent glitch propagation
   reg  lfxt_disable;
@@ -361,7 +370,7 @@ module  BCM (
   // Synchronize the OSCOFF control signal to the LFXT clock domain
   wire lfxt_clk_n  = ~lfxt_clk;
 
-  omsp_sync_cell sync_cell_lfxt_disable (
+  msp430_sync_cell sync_cell_lfxt_disable (
     .data_out  (lfxt_enable),
     .data_in   (~lfxt_disable),
     .clk       (lfxt_clk_n),
@@ -374,15 +383,15 @@ module  BCM (
   wire lfxt_mclk_wkup;
   wire lfxt_en_wkup;
 
-  omsp_and_gate and_lfxt_mclk_wkup (.y(lfxt_mclk_wkup), .a(mclk_wkup),    .b(bcsctl2[`SELMx]));
-  omsp_and_gate and_lfxt_en_wkup   (.y(lfxt_en_wkup),   .a(~lfxt_enable), .b(lfxt_enable_nxt));
+  msp430_and_gate and_lfxt_mclk_wkup (.y(lfxt_mclk_wkup), .a(mclk_wkup),    .b(bcsctl2[`SELMx]));
+  msp430_and_gate and_lfxt_en_wkup   (.y(lfxt_en_wkup),   .a(~lfxt_enable), .b(lfxt_enable_nxt));
 
   wire   lfxt_wkup_set  = lfxt_mclk_wkup | lfxt_en_wkup | cpu_en_wkup;
 
   // Scan MUX for the asynchronous SET
   wire lfxt_wkup_set_scan;
 
-  omsp_scan_mux scan_mux_lfxt_wkup (
+  msp430_scan_mux scan_mux_lfxt_wkup (
     .scan_mode    (scan_mode),
     .data_in_scan (por_a),
     .data_in_func (lfxt_wkup_set | por),
@@ -391,7 +400,7 @@ module  BCM (
 
   // Scan MUX to increase coverage 
   wire lfxt_wkup_clear;
-  omsp_scan_mux scan_mux_lfxt_wkup_clear (
+  msp430_scan_mux scan_mux_lfxt_wkup_clear (
     .scan_mode    (scan_mode),
     .data_in_scan (lfxt_wkup_set),
     .data_in_func (1'b1),
@@ -401,14 +410,14 @@ module  BCM (
   // The wakeup is asynchronously set, synchronously released
   wire lfxt_wkup_n;
 
-  omsp_sync_cell sync_cell_lfxt_wkup (
+  msp430_sync_cell sync_cell_lfxt_wkup (
     .data_out  (lfxt_wkup_n),
     .data_in   (lfxt_wkup_clear),
     .clk       (lfxt_clk_n),
     .rst       (lfxt_wkup_set_scan)
   );
 
-  omsp_and_gate and_lfxt_wkup (.y(lfxt_wkup), .a(~lfxt_wkup_n), .b(cpu_en));
+  msp430_and_gate and_lfxt_wkup (.y(lfxt_wkup), .a(~lfxt_wkup_n), .b(cpu_en));
   `else
   assign lfxt_enable    = 1'b1;
   assign lfxt_wkup      = 1'b0;
@@ -421,7 +430,7 @@ module  BCM (
 
   wire lfxt_clk_s;
 
-  omsp_sync_cell sync_cell_lfxt_clk (
+  msp430_sync_cell sync_cell_lfxt_clk (
     .data_out  (lfxt_clk_s),
     .data_in   (lfxt_clk),
     .clk       (mclk),
@@ -455,14 +464,14 @@ module  BCM (
   // Synchronize CPU_EN signal to the MCLK domain
   //----------------------------------------------
   `ifdef SYNC_CPU_EN
-  omsp_sync_cell sync_cell_cpu_en (
+  msp430_sync_cell sync_cell_cpu_en (
     .data_out  (cpu_en_s),
     .data_in   (cpu_en),
     .clk       (nodiv_mclk),
     .rst       (por)
   );
 
-  omsp_and_gate and_cpu_en_wkup (.y(cpu_en_wkup), .a(cpu_en), .b(~cpu_en_s));
+  msp430_and_gate and_cpu_en_wkup (.y(cpu_en_wkup), .a(cpu_en), .b(~cpu_en_s));
   `else
   assign cpu_en_s    = cpu_en;
   assign cpu_en_wkup = 1'b0;
@@ -473,7 +482,7 @@ module  BCM (
   `ifdef LFXT_DOMAIN
   wire cpu_en_aux_s;
 
-  omsp_sync_cell sync_cell_cpu_aux_en (
+  msp430_sync_cell sync_cell_cpu_aux_en (
     .data_out  (cpu_en_aux_s),
     .data_in   (cpu_en),
     .clk       (lfxt_clk),
@@ -489,7 +498,7 @@ module  BCM (
   `ifdef ASIC_CLOCKING
   `ifdef SMCLK_MUX
   wire cpu_en_sm_s;
-  omsp_sync_cell sync_cell_cpu_sm_en (
+  msp430_sync_cell sync_cell_cpu_sm_en (
     .data_out  (cpu_en_sm_s),
     .data_in   (cpu_en),
     .clk       (nodiv_smclk),
@@ -507,7 +516,7 @@ module  BCM (
   // Clock MUX
   //----------------------------
   `ifdef MCLK_MUX
-  omsp_clock_mux clock_mux_mclk (
+  msp430_clock_mux clock_mux_mclk (
     .clk_out   (nodiv_mclk),
     .clk_in0   (dco_clk),
     .clk_in1   (lfxt_clk),
@@ -525,7 +534,7 @@ module  BCM (
   wire mclk_wkup_s;
 
   `ifdef CPUOFF_EN
-  omsp_sync_cell sync_cell_mclk_wkup (
+  msp430_sync_cell sync_cell_mclk_wkup (
     .data_out  (mclk_wkup_s),
     .data_in   (mclk_wkup),
     .clk       (nodiv_mclk),
@@ -566,7 +575,7 @@ module  BCM (
   //----------------------------
   `ifdef MCLK_CGATE
 
-  omsp_clock_gate clock_gate_mclk (
+  msp430_clock_gate clock_gate_mclk (
     .gclk        (mclk),
     .clk         (nodiv_mclk),
     .enable      (mclk_div_en),
@@ -593,14 +602,14 @@ module  BCM (
   wire puc_lfxt_rst;
   wire puc_lfxt_noscan_n;
 
-  omsp_sync_cell sync_cell_puc_lfxt (
+  msp430_sync_cell sync_cell_puc_lfxt (
     .data_out     (puc_lfxt_noscan_n),
     .data_in      (1'b1),
     .clk          (nodiv_aclk),
     .rst          (puc_rst)
   );
 
-  omsp_scan_mux scan_mux_puc_lfxt (
+  msp430_scan_mux scan_mux_puc_lfxt (
     .scan_mode    (scan_mode),
     .data_in_scan (por_a),
     .data_in_func (~puc_lfxt_noscan_n),
@@ -627,7 +636,7 @@ module  BCM (
   // If the OSCOFF mode is enabled synchronize OSCOFF signal
   wire oscoff_s;
   `ifdef OSCOFF_EN
-  omsp_sync_cell sync_cell_oscoff (
+  msp430_sync_cell sync_cell_oscoff (
     .data_out     (oscoff_s),
     .data_in      (oscoff),
     .clk          (nodiv_aclk),
@@ -657,7 +666,7 @@ module  BCM (
                                                                            &aclk_div[2:0]);
 
   // Clock gate
-  omsp_clock_gate clock_gate_aclk (
+  msp430_clock_gate clock_gate_aclk (
     .gclk        (aclk),
     .clk         (nodiv_aclk),
     .enable      (aclk_div_en),
@@ -703,7 +712,7 @@ module  BCM (
   // Clock MUX
   //----------------------------
   `ifdef SMCLK_MUX
-  omsp_clock_mux clock_mux_smclk (
+  msp430_clock_mux clock_mux_smclk (
     .clk_out   (nodiv_smclk),
     .clk_in0   (dco_clk),
     .clk_in1   (lfxt_clk),
@@ -728,14 +737,14 @@ module  BCM (
   // Local Reset synchronizer
   wire puc_sm_noscan_n;
   wire puc_sm_rst;
-  omsp_sync_cell sync_cell_puc_sm (
+  msp430_sync_cell sync_cell_puc_sm (
     .data_out     (puc_sm_noscan_n),
     .data_in      (1'b1),
     .clk          (nodiv_smclk),
     .rst          (puc_rst)
   );
 
-  omsp_scan_mux scan_mux_puc_sm (
+  msp430_scan_mux scan_mux_puc_sm (
     .scan_mode    (scan_mode),
     .data_in_scan (por_a),
     .data_in_func (~puc_sm_noscan_n),
@@ -745,7 +754,7 @@ module  BCM (
   // SCG1 synchronizer
   `ifdef SCG1_EN
   wire scg1_s;
-  omsp_sync_cell sync_cell_scg1 (
+  msp430_sync_cell sync_cell_scg1 (
     .data_out     (scg1_s),
     .data_in      (scg1),
     .clk          (nodiv_smclk),
@@ -805,7 +814,7 @@ module  BCM (
   // Generate sub-system clock
   //----------------------------
   `ifdef SMCLK_CGATE
-  omsp_clock_gate clock_gate_smclk (
+  msp430_clock_gate clock_gate_smclk (
     .gclk        (smclk),
     .clk         (nodiv_smclk),
     .enable      (smclk_div_en),
@@ -853,7 +862,7 @@ module  BCM (
   `ifdef SYNC_DBG_EN
   wire dbg_en_n_s;
 
-  omsp_sync_cell sync_cell_dbg_en (
+  msp430_sync_cell sync_cell_dbg_en (
     .data_out  (dbg_en_n_s),
     .data_in   (~dbg_en),
     .clk       (mclk),
@@ -874,7 +883,7 @@ module  BCM (
   //------------------------------------------------
   `ifdef DBG_EN
   `ifdef ASIC_CLOCKING
-  omsp_clock_gate clock_gate_dbg_clk (
+  msp430_clock_gate clock_gate_dbg_clk (
     .gclk        (dbg_clk),
     .clk         (mclk),
     .enable      (dbg_en_s),
@@ -909,7 +918,7 @@ module  BCM (
   wire      por_noscan;
 
   // Reset Synchronizer
-  omsp_sync_reset sync_reset_por (
+  msp430_sync_reset sync_reset_por (
     .rst_s        (por_noscan),
     .clk          (nodiv_mclk),
     .rst_a        (por_a)
@@ -917,7 +926,7 @@ module  BCM (
 
   // Scan Reset Mux
   `ifdef ASIC
-  omsp_scan_mux scan_mux_por (
+  msp430_scan_mux scan_mux_por (
     .scan_mode    (scan_mode),
     .data_in_scan (por_a),
     .data_in_func (por_noscan),
@@ -941,7 +950,7 @@ module  BCM (
 
   // Scan Reset Mux
   `ifdef ASIC
-  omsp_scan_mux scan_mux_dbg_rst (
+  msp430_scan_mux scan_mux_dbg_rst (
     .scan_mode    (scan_mode),
     .data_in_scan (por_a),
     .data_in_func (dbg_rst_noscan),
@@ -971,7 +980,7 @@ module  BCM (
                                                             // enabled at power-on-reset time
                                                             // Scan Reset Mux
   `ifdef ASIC
-  omsp_scan_mux scan_mux_puc_rst_a (
+  msp430_scan_mux scan_mux_puc_rst_a (
     .scan_mode    (scan_mode),
     .data_in_scan (por_a),
     .data_in_func (puc_a),
@@ -983,7 +992,7 @@ module  BCM (
 
   // Reset Synchronizer
   // (required because of the asynchronous watchdog reset)
-  omsp_sync_cell sync_cell_puc (
+  msp430_sync_cell sync_cell_puc (
     .data_out  (puc_noscan_n),
     .data_in   (~puc_s),
     .clk       (mclk),
@@ -992,7 +1001,7 @@ module  BCM (
 
   // Scan Reset Mux
   `ifdef ASIC
-  omsp_scan_mux scan_mux_puc_rst (
+  msp430_scan_mux scan_mux_puc_rst (
     .scan_mode    (scan_mode),
     .data_in_scan (por_a),
     .data_in_func (~puc_noscan_n),
@@ -1004,9 +1013,9 @@ module  BCM (
 
   // PUC pending set the serial debug interface
   assign puc_pnd_set = ~puc_noscan_n;
-endmodule // BCM
+endmodule // msp430_bcm
 
 `ifdef OMSP_NO_INCLUDE
 `else
-`include "openMSP430_undefines.v"
+`include "msp430_undefines.sv"
 `endif

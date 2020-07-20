@@ -1,48 +1,57 @@
-//----------------------------------------------------------------------------
-// Copyright (C) 2009 , Olivier Girard
-//
-// Redistribution and use in source and binary forms, with or without
-// modification, are permitted provided that the following conditions
-// are met:
-//     * Redistributions of source code must retain the above copyright
-//       notice, this list of conditions and the following disclaimer.
-//     * Redistributions in binary form must reproduce the above copyright
-//       notice, this list of conditions and the following disclaimer in the
-//       documentation and/or other materials provided with the distribution.
-//     * Neither the name of the authors nor the names of its contributors
-//       may be used to endorse or promote products derived from this software
-//       without specific prior written permission.
-//
-// THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
-// AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
-// IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
-// ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
-// LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY,
-// OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
-// SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
-// INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
-// CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
-// ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF
-// THE POSSIBILITY OF SUCH DAMAGE
-//
-//----------------------------------------------------------------------------
-//
-// *File Name: openMSP430.v
-// 
-// *Module Description:
-//                       openMSP430 Top level file
-//
-// *Author(s):
-//              - Olivier Girard,    olgirard@gmail.com
-//
-//----------------------------------------------------------------------------
+////////////////////////////////////////////////////////////////////////////////
+//                                            __ _      _     _               //
+//                                           / _(_)    | |   | |              //
+//                __ _ _   _  ___  ___ _ __ | |_ _  ___| | __| |              //
+//               / _` | | | |/ _ \/ _ \ '_ \|  _| |/ _ \ |/ _` |              //
+//              | (_| | |_| |  __/  __/ | | | | | |  __/ | (_| |              //
+//               \__, |\__,_|\___|\___|_| |_|_| |_|\___|_|\__,_|              //
+//                  | |                                                       //
+//                  |_|                                                       //
+//                                                                            //
+//                                                                            //
+//              MSP430 CPU                                                    //
+//              Processing Unit                                               //
+//                                                                            //
+////////////////////////////////////////////////////////////////////////////////
+
+/* Copyright (c) 2015-2016 by the author(s)
+ *
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions
+ * are met:
+ *     * Redistributions of source code must retain the above copyright
+ *       notice, this list of conditions and the following disclaimer.
+ *     * Redistributions in binary form must reproduce the above copyright
+ *       notice, this list of conditions and the following disclaimer in the
+ *       documentation and/or other materials provided with the distribution.
+ *     * Neither the name of the authors nor the names of its contributors
+ *       may be used to endorse or promote products derived from this software
+ *       without specific prior written permission.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+ * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+ * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+ * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
+ * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY,
+ * OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+ * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+ * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+ * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+ * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF
+ * THE POSSIBILITY OF SUCH DAMAGE
+ *
+ * =============================================================================
+ * Author(s):
+ *   Olivier Girard <olgirard@gmail.com>
+ *   Paco Reina Campo <pacoreinacampo@queenfield.tech>
+ */
 
 `ifdef OMSP_NO_INCLUDE
 `else
-`include "openMSP430_defines.v"
+`include "msp430_defines.sv"
 `endif
 
-module MSP430_CORE #(
+module msp430_pu #(
   parameter AW = 16,
   parameter DW = 16,
 
@@ -214,7 +223,7 @@ module MSP430_CORE #(
   //=============================================================================
   // 2)  GLOBAL CLOCK & RESET MANAGEMENT
   //=============================================================================
-  BCM BCM_0 (
+  msp430_bcm bcm (
     // OUTPUTs
     .aclk         (aclk),          // ACLK
     .aclk_en      (aclk_en),       // ACLK enablex
@@ -261,7 +270,7 @@ module MSP430_CORE #(
   //=============================================================================
   // 3)  FRONTEND (<=> FETCH & DECODE)
   //=============================================================================
-  FRONTEND FRONTEND_0 (
+  msp430_frontend frontend (
     // OUTPUTs
     .dbg_halt_st  (dbg_halt_st),   // Halt/Run status from CPU
     .decode_noirq (decode_noirq),  // Frontend decode instruction
@@ -321,7 +330,7 @@ module MSP430_CORE #(
   //=============================================================================
   // 4)  EXECUTION UNIT
   //=============================================================================
-  EXECUTION EXECUTION_0 (
+  msp430_execution execution (
     // OUTPUTs
     .r0           (r0),
     .r1           (r1),
@@ -383,7 +392,7 @@ module MSP430_CORE #(
   //=============================================================================
   // 5)  MEMORY BACKBONE
   //=============================================================================
-  MEMORY MEMORY_0 (
+  msp430_memory memory (
     // OUTPUTs
     .dbg_mem_din  (dbg_mem_din),   // Debug unit Memory data input
     .dmem_addr    (dmem_addr),     // Data Memory address
@@ -425,7 +434,7 @@ module MSP430_CORE #(
   //=============================================================================
   // 6)  SPECIAL FUNCTION REGISTERS
   //=============================================================================
-  SFR SFR_0 (
+  msp430_sfr sfr (
     // OUTPUTs
     .cpu_id       (cpu_id),        // CPU ID
     .nmi_pnd      (nmi_pnd),       // NMI Pending
@@ -455,7 +464,7 @@ module MSP430_CORE #(
   // 7)  WATCHDOG TIMER
   //=============================================================================
   `ifdef WATCHDOG
-  T_WATCHDOG T_WATCHDOG_0 (
+  msp430_watchdog watchdog (
     // OUTPUTs
     .per_dout       (per_dout_wdog),      // Peripheral data output
     .wdt_irq        (wdt_irq),            // Watchdog-timer interrupt
@@ -497,7 +506,7 @@ module MSP430_CORE #(
   // 8)  HARDWARE MULTIPLIER
   //=============================================================================
   `ifdef MULTIPLYING
-  MULTIPLIER MULTIPLIER_0 (
+  msp430_multiplier multiplier (
     // OUTPUTs
     .per_dout     (per_dout_mpy),  // Peripheral data output
 
@@ -527,7 +536,7 @@ module MSP430_CORE #(
   // 10)  DEBUG INTERFACE
   //=============================================================================
   `ifdef DBG_EN
-  DBG DBG_0 (
+  msp430_dbg dbg (
     // OUTPUTs
     .dbg_cpu_reset     (dbg_cpu_reset),     // Reset CPU from debug interface
     .dbg_freeze        (dbg_freeze),        // Freeze peripherals
@@ -576,9 +585,9 @@ module MSP430_CORE #(
   assign dbg_reg_wr      =  1'b0;
   assign dbg_uart_txd    =  1'b1;
   `endif
-endmodule // MSP430_CORE
+endmodule // msp430_pu
 
 `ifdef OMSP_NO_INCLUDE
 `else
-`include "openMSP430_undefines.v"
+`include "msp430_undefines.sv"
 `endif

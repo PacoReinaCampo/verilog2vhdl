@@ -1,48 +1,57 @@
-//----------------------------------------------------------------------------
-// Copyright (C) 2009 , Olivier Girard
-//
-// Redistribution and use in source and binary forms, with or without
-// modification, are permitted provided that the following conditions
-// are met:
-//     * Redistributions of source code must retain the above copyright
-//       notice, this list of conditions and the following disclaimer.
-//     * Redistributions in binary form must reproduce the above copyright
-//       notice, this list of conditions and the following disclaimer in the
-//       documentation and/or other materials provided with the distribution.
-//     * Neither the name of the authors nor the names of its contributors
-//       may be used to endorse or promote products derived from this software
-//       without specific prior written permission.
-//
-// THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
-// AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
-// IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
-// ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
-// LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY,
-// OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
-// SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
-// INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
-// CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
-// ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF
-// THE POSSIBILITY OF SUCH DAMAGE
-//
-//----------------------------------------------------------------------------
-//
-// *File Name: MULTIPLIER.v
-// 
-// *Module Description:
-//                       16x16 Hardware multiplier.
-//
-// *Author(s):
-//              - Olivier Girard,    olgirard@gmail.com
-//
-//----------------------------------------------------------------------------
+////////////////////////////////////////////////////////////////////////////////
+//                                            __ _      _     _               //
+//                                           / _(_)    | |   | |              //
+//                __ _ _   _  ___  ___ _ __ | |_ _  ___| | __| |              //
+//               / _` | | | |/ _ \/ _ \ '_ \|  _| |/ _ \ |/ _` |              //
+//              | (_| | |_| |  __/  __/ | | | | | |  __/ | (_| |              //
+//               \__, |\__,_|\___|\___|_| |_|_| |_|\___|_|\__,_|              //
+//                  | |                                                       //
+//                  |_|                                                       //
+//                                                                            //
+//                                                                            //
+//              MSP430 CPU                                                    //
+//              Processing Unit                                               //
+//                                                                            //
+////////////////////////////////////////////////////////////////////////////////
+
+/* Copyright (c) 2015-2016 by the author(s)
+ *
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions
+ * are met:
+ *     * Redistributions of source code must retain the above copyright
+ *       notice, this list of conditions and the following disclaimer.
+ *     * Redistributions in binary form must reproduce the above copyright
+ *       notice, this list of conditions and the following disclaimer in the
+ *       documentation and/or other materials provided with the distribution.
+ *     * Neither the name of the authors nor the names of its contributors
+ *       may be used to endorse or promote products derived from this software
+ *       without specific prior written permission.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+ * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+ * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+ * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
+ * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY,
+ * OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+ * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+ * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+ * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+ * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF
+ * THE POSSIBILITY OF SUCH DAMAGE
+ *
+ * =============================================================================
+ * Author(s):
+ *   Olivier Girard <olgirard@gmail.com>
+ *   Paco Reina Campo <pacoreinacampo@queenfield.tech>
+ */
 
 `ifdef OMSP_NO_INCLUDE
 `else
-`include "openMSP430_defines.v"
+`include "msp430_defines.sv"
 `endif
 
-module  MULTIPLIER (
+module  msp430_multiplier (
   // OUTPUTs
   output       [15:0] per_dout,       // Peripheral data output
 
@@ -142,7 +151,7 @@ module  MULTIPLIER (
   `ifdef CLOCK_GATING
   wire        mclk_op1;
 
-  omsp_clock_gate clock_gate_op1 (
+  msp430_clock_gate clock_gate_op1 (
     .gclk(mclk_op1),
     .clk (mclk),
     .enable(op1_wr),
@@ -175,7 +184,7 @@ module  MULTIPLIER (
   `ifdef CLOCK_GATING
   wire        mclk_op2;
 
-  omsp_clock_gate clock_gate_op2 (
+  msp430_clock_gate clock_gate_op2 (
     .gclk(mclk_op2),
     .clk (mclk),
     .enable(op2_wr),
@@ -210,7 +219,7 @@ module  MULTIPLIER (
   wire        reslo_en = reslo_wr | result_clr | result_wr;
   wire        mclk_reslo;
 
-  omsp_clock_gate clock_gate_reslo (
+  msp430_clock_gate clock_gate_reslo (
     .gclk(mclk_reslo),
     .clk (mclk),
     .enable(reslo_en),
@@ -249,7 +258,7 @@ module  MULTIPLIER (
   wire        reshi_en = reshi_wr | result_clr | result_wr;
   wire        mclk_reshi;
 
-  omsp_clock_gate clock_gate_reshi (
+  msp430_clock_gate clock_gate_reshi (
     .gclk(mclk_reshi),
     .clk (mclk),
     .enable(reshi_en),
@@ -322,7 +331,6 @@ module  MULTIPLIER (
 
   // Detect signed mode
   reg sign_sel;
-
   `ifdef CLOCK_GATING
   always @ (posedge mclk_op1 or posedge puc_rst) begin
     if (puc_rst)     sign_sel <=  1'b0;
@@ -337,7 +345,6 @@ module  MULTIPLIER (
 
   // Detect accumulate mode
   reg acc_sel;
-
   `ifdef CLOCK_GATING
   always @ (posedge mclk_op1 or posedge puc_rst) begin
     if (puc_rst)     acc_sel  <=  1'b0;
@@ -427,9 +434,9 @@ module  MULTIPLIER (
   // an early read can happen during the second cycle.
   assign early_read   = cycle[1];
   `endif
-endmodule // MULTIPLIER
+endmodule // msp430_multiplier
 
 `ifdef OMSP_NO_INCLUDE
 `else
-`include "openMSP430_undefines.v"
+`include "msp430_undefines.sv"
 `endif
