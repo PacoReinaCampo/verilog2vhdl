@@ -2,11 +2,14 @@ riscv/core/cache/riscv_dcache_core.sv
 riscv/core/cache/riscv_dext.sv
 riscv/core/cache/riscv_icache_core.sv
 riscv/core/cache/riscv_noicache_core.sv
-riscv/core/execution/riscv_alu.sv
-riscv/core/execution/riscv_bu.sv
-riscv/core/execution/riscv_div.sv
-riscv/core/execution/riscv_lsu.sv
-riscv/core/execution/riscv_mul.sv
+riscv/core/decode/riscv_id.sv
+riscv/core/execute/riscv_alu.sv
+riscv/core/execute/riscv_bu.sv
+riscv/core/execute/riscv_div.sv
+riscv/core/execute/riscv_execution.sv
+riscv/core/execute/riscv_lsu.sv
+riscv/core/execute/riscv_mul.sv
+riscv/core/fetch/riscv_if.sv
 riscv/core/memory/riscv_dmem_ctrl.sv
 riscv/core/memory/riscv_imem_ctrl.sv
 riscv/core/memory/riscv_membuf.sv
@@ -18,9 +21,6 @@ riscv/core/memory/riscv_pmpchk.sv
 riscv/core/riscv_bp.sv
 riscv/core/riscv_core.sv
 riscv/core/riscv_du.sv
-riscv/core/riscv_execution.sv
-riscv/core/riscv_id.sv
-riscv/core/riscv_if.sv
 riscv/core/riscv_memory.sv
 riscv/core/riscv_rf.sv
 riscv/core/riscv_state.sv
@@ -34,5 +34,14 @@ riscv/memory/riscv_ram_queue.sv
 
 riscv/pkg/riscv_mpsoc_pkg.sv
 
-riscv/pu/riscv_biu.sv
-riscv/pu/riscv_pu.sv
+riscv/pu/riscv_ahb2axi.sv
+riscv/pu/riscv_axi2ahb.sv
+riscv/pu/riscv_biu2ahb3.sv
+riscv/pu/riscv_biu2axi4.sv
+riscv/pu/riscv_biu2wb.sv
+riscv/pu/riscv_module_ahb3.sv
+riscv/pu/riscv_module_axi4.sv
+riscv/pu/riscv_module_wb.sv
+riscv/pu/riscv_pu_ahb3.sv
+riscv/pu/riscv_pu_axi4.sv
+riscv/pu/riscv_pu_wb.sv

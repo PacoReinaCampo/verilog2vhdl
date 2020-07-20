@@ -37,7 +37,7 @@
  *
  * =============================================================================
  * Author(s):
- *   Francisco Javier Reina Campo <frareicam@gmail.com>
+ *   Paco Reina Campo <pacoreinacampo@queenfield.tech>
  */
 
 `include "riscv_mpsoc_pkg.sv"
@@ -58,7 +58,7 @@ module riscv_pmpchk #(
     input                         instruction_i,   //This is an instruction access
     input                         req_i,           //Memory access requested
     input              [PLEN-1:0] adr_i,           //Physical Memory address (i.e. after translation)
-    input logic        [     2:0] size_i,          //Transfer size
+    input wire         [     2:0] size_i,          //Transfer size
     input                         we_i,            //Read/Write enable
 
     //Output

@@ -37,7 +37,7 @@
  *
  * =============================================================================
  * Author(s):
- *   Francisco Javier Reina Campo <frareicam@gmail.com>
+ *   Paco Reina Campo <pacoreinacampo@queenfield.tech>
  */
 
 `include "riscv_mpsoc_pkg.sv"
@@ -79,7 +79,7 @@ module riscv_lsu #(
     output reg [XLEN          -1:0] dmem_d,
     output reg                      dmem_req,
     output reg                      dmem_we,
-    output logic              [2:0] dmem_size,
+    output reg                [2:0] dmem_size,
 
     //From Memory (for AMO)
     input                           dmem_ack,

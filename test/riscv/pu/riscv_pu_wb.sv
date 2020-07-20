@@ -11,7 +11,7 @@
 //                                                                            //
 //              MPSoC-RISCV CPU                                               //
 //              Processing Unit                                               //
-//              AMBA3 AHB-Lite Bus Interface                                  //
+//              Wishbone Bus Interface                                        //
 //                                                                            //
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -42,7 +42,7 @@
 
 `include "riscv_mpsoc_pkg.sv"
 
-module riscv_pu #(
+module riscv_pu_wb #(
   parameter            XLEN               = 64,
   parameter            PLEN               = 64,
   parameter [XLEN-1:0] PC_INIT            = 'h8000_0000,
@@ -97,38 +97,38 @@ module riscv_pu #(
   parameter            PARCEL_SIZE        = 32
 )
   (
-    //AHB interfaces
     input                               HRESETn,
     input                               HCLK,
 
-    input logic [PMA_CNT-1:0][    13:0] pma_cfg_i,
-    input logic [PMA_CNT-1:0][XLEN-1:0] pma_adr_i,
+    input wire  [PMA_CNT-1:0][    13:0] pma_cfg_i,
+    input wire  [PMA_CNT-1:0][XLEN-1:0] pma_adr_i,
 
-    output                              ins_HSEL,
-    output                   [PLEN-1:0] ins_HADDR,
-    output                   [XLEN-1:0] ins_HWDATA,
-    input                    [XLEN-1:0] ins_HRDATA,
-    output                              ins_HWRITE,
-    output                   [     2:0] ins_HSIZE,
-    output                   [     2:0] ins_HBURST,
-    output                   [     3:0] ins_HPROT,
-    output                   [     1:0] ins_HTRANS,
-    output                              ins_HMASTLOCK,
-    input                               ins_HREADY,
-    input                               ins_HRESP,
+    //WB interfaces
+    output          [PLEN         -1:0] wb_ins_adr_o,
+    output          [XLEN         -1:0] wb_ins_dat_o,
+    output          [              3:0] wb_ins_sel_o,
+    output                              wb_ins_we_o,
+    output                              wb_ins_cyc_o,
+    output                              wb_ins_stb_o,
+    output          [              2:0] wb_ins_cti_o,
+    output          [              1:0] wb_ins_bte_o,
+    input           [XLEN         -1:0] wb_ins_dat_i,
+    input                               wb_ins_ack_i,
+    input                               wb_ins_err_i,
+    input           [              2:0] wb_ins_rty_i,
 
-    output                              dat_HSEL,
-    output                   [PLEN-1:0] dat_HADDR,
-    output                   [XLEN-1:0] dat_HWDATA,
-    input                    [XLEN-1:0] dat_HRDATA,
-    output                              dat_HWRITE,
-    output                   [     2:0] dat_HSIZE,
-    output                   [     2:0] dat_HBURST,
-    output                   [     3:0] dat_HPROT,
-    output                   [     1:0] dat_HTRANS,
-    output                              dat_HMASTLOCK,
-    input                               dat_HREADY,
-    input                               dat_HRESP,
+    output          [PLEN         -1:0] wb_dat_adr_o,
+    output          [XLEN         -1:0] wb_dat_dat_o,
+    output          [              3:0] wb_dat_sel_o,
+    output                              wb_dat_we_o,
+    output                              wb_dat_stb_o,
+    output                              wb_dat_cyc_o,
+    output          [              2:0] wb_dat_cti_o,
+    output          [              1:0] wb_dat_bte_o,
+    input           [XLEN         -1:0] wb_dat_dat_i,
+    input                               wb_dat_ack_i,
+    input                               wb_dat_err_i,
+    input           [              2:0] wb_dat_rty_i,
 
     //Interrupts
     input                               ext_nmi,
@@ -163,7 +163,7 @@ module riscv_pu #(
 
   logic                               dmem_req;
   logic          [XLEN          -1:0] dmem_adr;
-  logic                         [2:0] dmem_size;
+  logic          [               2:0] dmem_size;
   logic                               dmem_we;
   logic          [XLEN          -1:0] dmem_d,
                                       dmem_q;
@@ -421,25 +421,26 @@ module riscv_pu #(
   );
 
   //Instantiate BIU
-  riscv_biu #(
+  riscv_biu2wb #(
     .XLEN ( XLEN ),
     .PLEN ( PLEN )
   )
   ibiu (
     .HRESETn       ( HRESETn       ),
     .HCLK          ( HCLK          ),
-    .HSEL          ( ins_HSEL      ),
-    .HADDR         ( ins_HADDR     ),
-    .HWDATA        ( ins_HWDATA    ),
-    .HRDATA        ( ins_HRDATA    ),
-    .HWRITE        ( ins_HWRITE    ),
-    .HSIZE         ( ins_HSIZE     ),
-    .HBURST        ( ins_HBURST    ),
-    .HPROT         ( ins_HPROT     ),
-    .HTRANS        ( ins_HTRANS    ),
-    .HMASTLOCK     ( ins_HMASTLOCK ),
-    .HREADY        ( ins_HREADY    ),
-    .HRESP         ( ins_HRESP     ),
+
+    .wb_adr_o      ( wb_ins_adr_o  ),
+    .wb_dat_o      ( wb_ins_dat_o  ),
+    .wb_sel_o      ( wb_ins_sel_o  ),
+    .wb_we_o       ( wb_ins_we_o   ),
+    .wb_cyc_o      ( wb_ins_cyc_o  ),
+    .wb_stb_o      ( wb_ins_stb_o  ),
+    .wb_cti_o      ( wb_ins_cti_o  ),
+    .wb_bte_o      ( wb_ins_bte_o  ),
+    .wb_dat_i      ( wb_ins_dat_i  ),
+    .wb_ack_i      ( wb_ins_ack_i  ),
+    .wb_err_i      ( wb_ins_err_i  ),
+    .wb_rty_i      ( wb_ins_rty_i  ),
 
     .biu_stb_i     ( ibiu_stb      ),
     .biu_stb_ack_o ( ibiu_stb_ack  ),
@@ -457,25 +458,26 @@ module riscv_pu #(
     .biu_err_o     ( ibiu_err      )
   );
 
-  riscv_biu #(
+  riscv_biu2wb #(
     .XLEN ( XLEN ),
     .PLEN ( PLEN )
   )
   dbiu (
     .HRESETn       ( HRESETn       ),
     .HCLK          ( HCLK          ),
-    .HSEL          ( dat_HSEL      ),
-    .HADDR         ( dat_HADDR     ),
-    .HWDATA        ( dat_HWDATA    ),
-    .HRDATA        ( dat_HRDATA    ),
-    .HWRITE        ( dat_HWRITE    ),
-    .HSIZE         ( dat_HSIZE     ),
-    .HBURST        ( dat_HBURST    ),
-    .HPROT         ( dat_HPROT     ),
-    .HTRANS        ( dat_HTRANS    ),
-    .HMASTLOCK     ( dat_HMASTLOCK ),
-    .HREADY        ( dat_HREADY    ),
-    .HRESP         ( dat_HRESP     ),
+
+    .wb_adr_o      ( wb_dat_adr_o  ),
+    .wb_dat_o      ( wb_dat_dat_o  ),
+    .wb_sel_o      ( wb_dat_sel_o  ),
+    .wb_we_o       ( wb_dat_we_o   ),
+    .wb_cyc_o      ( wb_dat_cyc_o  ),
+    .wb_stb_o      ( wb_dat_stb_o  ),
+    .wb_cti_o      ( wb_dat_cti_o  ),
+    .wb_bte_o      ( wb_dat_bte_o  ),
+    .wb_dat_i      ( wb_dat_dat_i  ),
+    .wb_ack_i      ( wb_dat_ack_i  ),
+    .wb_err_i      ( wb_dat_err_i  ),
+    .wb_rty_i      ( wb_dat_rty_i  ),
 
     .biu_stb_i     ( dbiu_stb      ),
     .biu_stb_ack_o ( dbiu_stb_ack  ),

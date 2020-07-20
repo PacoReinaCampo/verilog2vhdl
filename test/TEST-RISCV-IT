@@ -2,11 +2,14 @@ verilog2vhdl riscv/core/cache/riscv_dcache_core.sv
 verilog2vhdl riscv/core/cache/riscv_dext.sv
 verilog2vhdl riscv/core/cache/riscv_icache_core.sv
 verilog2vhdl riscv/core/cache/riscv_noicache_core.sv
-verilog2vhdl riscv/core/execution/riscv_alu.sv
-verilog2vhdl riscv/core/execution/riscv_bu.sv
-verilog2vhdl riscv/core/execution/riscv_div.sv
-verilog2vhdl riscv/core/execution/riscv_lsu.sv
-verilog2vhdl riscv/core/execution/riscv_mul.sv
+verilog2vhdl riscv/core/decode/riscv_id.sv
+verilog2vhdl riscv/core/execute/riscv_alu.sv
+verilog2vhdl riscv/core/execute/riscv_bu.sv
+verilog2vhdl riscv/core/execute/riscv_div.sv
+verilog2vhdl riscv/core/execute/riscv_execution.sv
+verilog2vhdl riscv/core/execute/riscv_lsu.sv
+verilog2vhdl riscv/core/execute/riscv_mul.sv
+verilog2vhdl riscv/core/fetch/riscv_if.sv
 verilog2vhdl riscv/core/memory/riscv_dmem_ctrl.sv
 verilog2vhdl riscv/core/memory/riscv_imem_ctrl.sv
 verilog2vhdl riscv/core/memory/riscv_membuf.sv
@@ -18,9 +21,6 @@ verilog2vhdl riscv/core/memory/riscv_pmpchk.sv
 verilog2vhdl riscv/core/riscv_bp.sv
 verilog2vhdl riscv/core/riscv_core.sv
 verilog2vhdl riscv/core/riscv_du.sv
-verilog2vhdl riscv/core/riscv_execution.sv
-verilog2vhdl riscv/core/riscv_id.sv
-verilog2vhdl riscv/core/riscv_if.sv
 verilog2vhdl riscv/core/riscv_memory.sv
 verilog2vhdl riscv/core/riscv_rf.sv
 verilog2vhdl riscv/core/riscv_state.sv
@@ -34,6 +34,14 @@ verilog2vhdl riscv/memory/riscv_ram_queue.sv
 
 verilog2vhdl riscv/pkg/riscv_mpsoc_pkg.sv
 
-verilog2vhdl riscv/pu/riscv_biu.sv
-verilog2vhdl riscv/pu/riscv_module.sv
-verilog2vhdl riscv/pu/riscv_pu.sv
+verilog2vhdl riscv/pu/riscv_ahb2axi.sv
+verilog2vhdl riscv/pu/riscv_axi2ahb.sv
+verilog2vhdl riscv/pu/riscv_biu2ahb3.sv
+verilog2vhdl riscv/pu/riscv_biu2axi4.sv
+verilog2vhdl riscv/pu/riscv_biu2wb.sv
+verilog2vhdl riscv/pu/riscv_module_ahb3.sv
+verilog2vhdl riscv/pu/riscv_module_axi4.sv
+verilog2vhdl riscv/pu/riscv_module_wb.sv
+verilog2vhdl riscv/pu/riscv_pu_ahb3.sv
+verilog2vhdl riscv/pu/riscv_pu_axi4.sv
+verilog2vhdl riscv/pu/riscv_pu_wb.sv

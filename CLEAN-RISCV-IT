@@ -2,11 +2,14 @@ rm -rf test/riscv/core/cache/riscv_dcache_core.vhd
 rm -rf test/riscv/core/cache/riscv_dext.vhd
 rm -rf test/riscv/core/cache/riscv_icache_core.vhd
 rm -rf test/riscv/core/cache/riscv_noicache_core.vhd
-rm -rf test/riscv/core/execution/riscv_alu.vhd
-rm -rf test/riscv/core/execution/riscv_bu.vhd
-rm -rf test/riscv/core/execution/riscv_div.vhd
-rm -rf test/riscv/core/execution/riscv_lsu.vhd
-rm -rf test/riscv/core/execution/riscv_mul.vhd
+rm -rf test/riscv/core/decode/riscv_id.vhd
+rm -rf test/riscv/core/execute/riscv_alu.vhd
+rm -rf test/riscv/core/execute/riscv_bu.vhd
+rm -rf test/riscv/core/execute/riscv_div.vhd
+rm -rf test/riscv/core/execute/riscv_execution.vhd
+rm -rf test/riscv/core/execute/riscv_lsu.vhd
+rm -rf test/riscv/core/execute/riscv_mul.vhd
+rm -rf test/riscv/core/fetch/riscv_if.vhd
 rm -rf test/riscv/core/memory/riscv_dmem_ctrl.vhd
 rm -rf test/riscv/core/memory/riscv_imem_ctrl.vhd
 rm -rf test/riscv/core/memory/riscv_membuf.vhd
@@ -18,9 +21,6 @@ rm -rf test/riscv/core/memory/riscv_pmpchk.vhd
 rm -rf test/riscv/core/riscv_bp.vhd
 rm -rf test/riscv/core/riscv_core.vhd
 rm -rf test/riscv/core/riscv_du.vhd
-rm -rf test/riscv/core/riscv_execution.vhd
-rm -rf test/riscv/core/riscv_id.vhd
-rm -rf test/riscv/core/riscv_if.vhd
 rm -rf test/riscv/core/riscv_memory.vhd
 rm -rf test/riscv/core/riscv_rf.vhd
 rm -rf test/riscv/core/riscv_state.vhd
@@ -34,5 +34,14 @@ rm -rf test/riscv/memory/riscv_ram_queue.vhd
 
 rm -rf test/riscv/pkg/riscv_mpsoc_pkg.vhd
 
-rm -rf test/riscv/pu/riscv_biu.vhd
-rm -rf test/riscv/pu/riscv_pu.vhd
+rm -rf test/riscv/pu/riscv_ahb2axi.vhd
+rm -rf test/riscv/pu/riscv_axi2ahb.vhd
+rm -rf test/riscv/pu/riscv_biu2ahb3.vhd
+rm -rf test/riscv/pu/riscv_biu2axi4.vhd
+rm -rf test/riscv/pu/riscv_biu2wb.vhd
+rm -rf test/riscv/pu/riscv_module_ahb3.vhd
+rm -rf test/riscv/pu/riscv_module_axi4.vhd
+rm -rf test/riscv/pu/riscv_module_wb.vhd
+rm -rf test/riscv/pu/riscv_pu_ahb3.vhd
+rm -rf test/riscv/pu/riscv_pu_axi4.vhd
+rm -rf test/riscv/pu/riscv_pu_wb.vhd
