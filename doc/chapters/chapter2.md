@@ -1,13 +1,4 @@
-# verilog2vhdl
-## QueenField
-
-![QueenField](../icon.jpg)
-
-# 1. INTRODUCTION
-
-A Hardware Description Language (HDL) is a specialized computer language used to describe the structure and behavior of digital logic circuits. It allows for the synthesis of a HDL into a netlist, which can then be synthesized, placed and routed to produce the set of masks used to create an integrated circuit.
-
-# 2. PROJECTS
+# PROJECTS
 
 ```
 .1. module_definitions
@@ -59,14 +50,4 @@ A Hardware Description Language (HDL) is a specialized computer language used to
 .14. common_compiler_directives
 .15. configurations
 .16. synthesis_supported_constructs
-```
-
-# 3. WORKFLOW
-
-```
-source install.sh
-
-cd test
-source test-msp430.sh
-source test-riscv.sh
 ```
