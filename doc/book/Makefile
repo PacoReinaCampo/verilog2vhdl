@@ -9,8 +9,8 @@
 ##                  |_|                                                          ##
 ##                                                                               ##
 ##                                                                               ##
-##              Homework                                                         ##
-##              Working from Home                                                ##
+##              verilog2vhdl EDA                                                 ##
+##              QueenField                                                       ##
 ##                                                                               ##
 ###################################################################################
 
@@ -54,8 +54,11 @@ EXPORTED_DOCS=\
 
 PANDOC_OPTIONS=-f markdown       \
     --table-of-contents          \
+    --toc-depth=6                \
     --number-sections            \
     --pdf-engine=xelatex         \
+    -V lof=yes                   \
+    -V lot=yes                   \
     -V fontsize="10pt"           \
     -V documentclass=report      \
     -V papersize=A4              \
@@ -86,7 +89,6 @@ PANDOC_EPUB_OPTIONS=--to epub3
 
 %.epub : %.md
 	pandoc -s $(shell cat $<) $(PANDOC_OPTIONS) $(PANDOC_EPUB_OPTIONS) -o $@
-
 
 all : $(EXPORTED_DOCS)
 
