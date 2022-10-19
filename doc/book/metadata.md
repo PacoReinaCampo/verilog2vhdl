@@ -1,6 +1,6 @@
 ---
 title: 'verilog2vhdl'
-subtitle: 'QueenField ![](../../icon.jpg)'
+subtitle: 'QueenField ![](../../verilog2vhdl.svg){width=17cm}'
 
 author: Paco Reina Campo
 
