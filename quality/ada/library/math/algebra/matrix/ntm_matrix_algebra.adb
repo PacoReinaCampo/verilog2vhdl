@@ -76,10 +76,87 @@ package body ntm_matrix_algebra is
 
     data_out : out matrix
   ) is
+
+    ZERO : constant float := 0.0;
+    ONE  : constant float := 1.0;
+
+    type internal_vector is array (0 .. 2*data_in'Length(2)-1) of float;
+
+    type augmented_matrix is array (0 .. data_in'Length(1)-1, 0 .. 2*data_in'Length(2)-1) of float;
+
+    n : integer;
+
+    ratio : float;
+
+    vector_in_int : internal_vector;
+    matrix_in_int : augmented_matrix;
   begin
+    -- Augmenting Identity Matrix of Order SIZE_IN
     for i in data_out'Range(1) loop
       for j in data_out'Range(2) loop
-        data_out(i, j) := data_in(i, j);
+        matrix_in_int(i, j) := data_in(i, j);
+
+        if i = j then
+          matrix_in_int(i, j + data_in'Length(2)-1) := ONE;
+        else
+          matrix_in_int(i, j + data_in'Length(2)-1) := ZERO;
+        end if;
+      end loop;
+    end loop;
+
+    for i in data_out'Range(1) loop
+      -- Row swapping
+      n := 0;
+
+      while (data_in(i, i) = ZERO) loop
+        for j in 0 .. 2*data_in'Length(2)-1 loop
+          vector_in_int(j) := matrix_in_int(i, j);
+        end loop;
+
+        if i < data_in'Length(2)-1 then
+          for j in 0 .. 2*data_in'Length(2)-1 loop
+            matrix_in_int(i, j) := matrix_in_int(i+n, j);
+          end loop;
+
+          for j in 0 .. 2*data_in'Length(2)-1 loop
+            matrix_in_int(i+n, j) := vector_in_int(j);
+          end loop;
+        else
+          for j in 0 .. 2*data_in'Length(2)-1 loop
+            matrix_in_int(i, j) := matrix_in_int(i-n, j);
+          end loop;
+
+          for j in 0 .. 2*data_in'Length(2)-1 loop
+            matrix_in_int(i-n, j) := vector_in_int(j);
+          end loop;
+        end if;
+
+        n := n + 1;
+      end loop;
+
+      -- Applying Gauss Jordan Elimination
+      for j in data_out'Range(2) loop
+        if i /= j then
+          ratio :=  matrix_in_int(j, i)/matrix_in_int(i, i);
+
+          for m in 0 .. 2*data_in'Length(2)-1 loop
+            matrix_in_int(j, m) := matrix_in_int(j, m) - ratio*matrix_in_int(i, m);
+          end loop;
+        end if;
+      end loop;
+    end loop;
+
+    -- Row Operation to Make Principal Diagonal to 1
+    for i in data_out'Range(1) loop
+      for j in 0 .. 2*data_in'Length(2)-1 loop
+        matrix_in_int(i, j) := matrix_in_int(i, j)/matrix_in_int(i, i);
+      end loop;
+    end loop;
+
+    -- Output
+    for i in data_out'Range(1) loop
+      for j in data_out'Range(2) loop
+        data_out(i, j) := matrix_in_int(i, j + data_in'Length(2)-1);
       end loop;
     end loop;
 
