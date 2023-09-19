@@ -42,5 +42,6 @@
 ##                                                                               ##
 ###################################################################################
 
-tree -P '*.sv' application > TREE-UVM-APPLICATION.txt
-tree -P '*.sv' library > TREE-UVM-LIBRARY.txt
+dot -Tsvg management.dot > management.svg
+
+dot -Tsvg user-developer.dot > user-developer.svg

@@ -42,5 +42,8 @@
 ##                                                                               ##
 ###################################################################################
 
-tree -P '*.sv' application > TREE-UVM-APPLICATION.txt
-tree -P '*.sv' library > TREE-UVM-LIBRARY.txt
+dot -Tsvg hardware-validation.dot > hardware-validation.svg
+dot -Tsvg software-validation.dot > software-validation.svg
+
+dot -Tsvg hardware-verification.dot > hardware-verification.svg
+dot -Tsvg software-verification.dot > software-verification.svg

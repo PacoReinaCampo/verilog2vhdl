@@ -43,3 +43,7 @@
 ###################################################################################
 
 tree -P '*.adb' library > TREE-ADA.txt
+
+tree -f -i -P '*.adb' library > CREATE-ADA.sh
+sed -i '/.adb/!d' CREATE-ADA.sh
+sed -i 's/^/touch /g' CREATE-ADA.sh
