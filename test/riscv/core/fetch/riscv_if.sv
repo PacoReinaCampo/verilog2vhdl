@@ -51,8 +51,8 @@ module riscv_if #(
   parameter [XLEN-1:0] PC_INIT = 'h8000_0000
 )
   (
-    input                           rstn,          //Reset
-    input                           clk,           //Clock
+    input                           rstn,          // Reset
+    input                           clk,           // Clock
     input                           id_stall,
 
     input                           if_stall_nxt_pc,
@@ -62,25 +62,25 @@ module riscv_if #(
     input                           if_parcel_misaligned, 
     input                           if_parcel_page_fault,
 
-    output reg [ILEN          -1:0] if_instr,      //Instruction out
-    output reg                      if_bubble,     //Insert bubble in the pipe (NOP instruction)
-    output reg [EXCEPTION_SIZE-1:0] if_exception,  //Exceptions
+    output reg [ILEN          -1:0] if_instr,      // Instruction out
+    output reg                      if_bubble,     // Insert bubble in the pipe (NOP instruction)
+    output reg [EXCEPTION_SIZE-1:0] if_exception,  // Exceptions
 
 
-    input      [               1:0] bp_bp_predict, //Branch Prediction bits
-    output reg [               1:0] if_bp_predict, //push down the pipe
+    input      [               1:0] bp_bp_predict, // Branch Prediction bits
+    output reg [               1:0] if_bp_predict, // push down the pipe
 
-    input                           bu_flush,      //flush pipe & load new program counter
+    input                           bu_flush,      // flush pipe & load new program counter
     input                           st_flush,
-    input                           du_flush,      //flush pipe after debug exit
+    input                           du_flush,      // flush pipe after debug exit
 
-    input      [XLEN          -1:0] bu_nxt_pc,     //Branch Unit Next Program Counter
-    input      [XLEN          -1:0] st_nxt_pc,     //State Next Program Counter
+    input      [XLEN          -1:0] bu_nxt_pc,     // Branch Unit Next Program Counter
+    input      [XLEN          -1:0] st_nxt_pc,     // State Next Program Counter
 
-    output reg [XLEN          -1:0] if_nxt_pc,     //next Program Counter
-    output                          if_stall,      //stall instruction fetch BIU (cache/bus-interface)
-    output                          if_flush,      //flush instruction fetch BIU (cache/bus-interface)
-    output reg [XLEN          -1:0] if_pc          //Program Counter
+    output reg [XLEN          -1:0] if_nxt_pc,     // next Program Counter
+    output                          if_stall,      // stall instruction fetch BIU (cache/bus-interface)
+    output                          if_flush,      // flush instruction fetch BIU (cache/bus-interface)
+    output reg [XLEN          -1:0] if_pc          // Program Counter
   );
 
   ////////////////////////////////////////////////////////////////
@@ -88,13 +88,13 @@ module riscv_if #(
   // Variables
   //
 
-  //Instruction size
+  // Instruction size
   logic is_16bit_instruction;
   logic is_32bit_instruction;
-  //logic is_48bit_instruction;
-  //logic is_64bit_instruction;
+  // logic is_48bit_instruction;
+  // logic is_64bit_instruction;
 
-  logic                      flushes;      //OR all flush signals
+  logic                      flushes;      // OR all flush signals
 
   logic [2*ILEN        -1:0] parcel_shift_register;
   logic [ILEN          -1:0] new_parcel;
@@ -124,35 +124,35 @@ module riscv_if #(
   // Module Body
   //
 
-  //All flush signals
+  // All flush signals
   assign flushes = bu_flush | st_flush | du_flush;
 
-  //Flush upper layer (memory BIU) 
+  // Flush upper layer (memory BIU) 
   assign if_flush = bu_flush | st_flush | du_flush | branch_taken;
 
-  //stall program counter on ID-stall and when instruction-hold register is full
+  // stall program counter on ID-stall and when instruction-hold register is full
   assign if_stall = id_stall | (&parcel_sr_valid & ~flushes);
 
-  //parcel is valid when bus-interface says so AND when received PC is requested PC
+  // parcel is valid when bus-interface says so AND when received PC is requested PC
   always @(posedge clk,negedge rstn) begin
     if (!rstn) parcel_valid <= 1'b0;
     else       parcel_valid <= if_parcel_valid;
   end
 
-  //Next Program Counter
+  // Next Program Counter
   always @(posedge clk,negedge rstn) begin
     if      (!rstn                        ) if_nxt_pc <= PC_INIT;
     else if ( st_flush                    ) if_nxt_pc <= st_nxt_pc;
-    else if ( bu_flush        ||  du_flush) if_nxt_pc <= bu_nxt_pc; //flush takes priority
-    //else if (!id_stall)
+    else if ( bu_flush        ||  du_flush) if_nxt_pc <= bu_nxt_pc; // flush takes priority
+    // else if (!id_stall)
     else begin
       if      ( branch_taken   ) if_nxt_pc <= branch_pc;
-      else if (!if_stall_nxt_pc) if_nxt_pc <= if_nxt_pc + 4; //if_stall_nxt_pc
+      else if (!if_stall_nxt_pc) if_nxt_pc <= if_nxt_pc + 4; // if_stall_nxt_pc
     end
   end
 
   //      else if (!if_stall_nxt_pc && !id_stall) if_nxt_pc <= if_nxt_pc + 'h4;
-  //TODO: handle if_stall and 16bit instructions
+  // TODO: handle if_stall and 16bit instructions
 
   always @(posedge clk,negedge rstn) begin
     if      (!rstn                        ) pd_pc <= PC_INIT;
@@ -169,9 +169,9 @@ module riscv_if #(
     else if (!id_stall            ) if_pc <= pd_pc;
   end
 
-  //Instruction
+  // Instruction
 
-  //instruction shift register, for 16bit instruction support
+  // instruction shift register, for 16bit instruction support
   assign new_parcel = if_parcel;
   always @(posedge clk,negedge rstn) begin
     if      (!rstn    ) parcel_shift_register <= {`INSTR_NOP,`INSTR_NOP};
@@ -199,14 +199,14 @@ module riscv_if #(
         parcel_sr_valid <= 'h0;
     else
       case (parcel_sr_valid)
-        //branch to 16bit address would yield 3'b010
-        3'b000:                           parcel_sr_valid <= {           1'b0, if_parcel_valid}; //3'b011;
-        3'b001: if (is_16bit_instruction) parcel_sr_valid <= {           1'b0, if_parcel_valid}; //3'b011;
-                else                      parcel_sr_valid <= {if_parcel_valid,            1'b1}; //3'b111;
-        3'b011: if (is_16bit_instruction) parcel_sr_valid <= {if_parcel_valid,            1'b1}; //3'b111;
-                else                      parcel_sr_valid <= {           1'b0, if_parcel_valid}; //3'b011;
-        3'b111: if (is_16bit_instruction) parcel_sr_valid <= {           1'b0,            1'b1,            1'b1}; //3'b011;
-                else                      parcel_sr_valid <= {if_parcel_valid,            1'b1}; //3'b111;
+        // branch to 16bit address would yield 3'b010
+        3'b000:                           parcel_sr_valid <= {           1'b0, if_parcel_valid}; // 3'b011;
+        3'b001: if (is_16bit_instruction) parcel_sr_valid <= {           1'b0, if_parcel_valid}; // 3'b011;
+                else                      parcel_sr_valid <= {if_parcel_valid,            1'b1}; // 3'b111;
+        3'b011: if (is_16bit_instruction) parcel_sr_valid <= {if_parcel_valid,            1'b1}; // 3'b111;
+                else                      parcel_sr_valid <= {           1'b0, if_parcel_valid}; // 3'b011;
+        3'b111: if (is_16bit_instruction) parcel_sr_valid <= {           1'b0,            1'b1,            1'b1}; // 3'b011;
+                else                      parcel_sr_valid <= {if_parcel_valid,            1'b1}; // 3'b111;
       endcase
   end
 
@@ -215,15 +215,15 @@ module riscv_if #(
 
   assign is_16bit_instruction = ~&active_parcel[1:0];
   assign is_32bit_instruction =  &active_parcel[1:0];
-  //assign is_48bit_instruction =   active_parcel[5:0] == 6'b011111;
-  //assign is_64bit_instruction =   active_parcel[6:0] == 7'b0111111;
+  // assign is_48bit_instruction =   active_parcel[5:0] == 6'b011111;
+  // assign is_64bit_instruction =   active_parcel[6:0] == 7'b0111111;
 
-  //Convert 16bit instructions to 32bit instructions here.
+  // Convert 16bit instructions to 32bit instructions here.
   always @(*) begin
     case(active_parcel)
-      `WFI    : pd_instr = `INSTR_NOP;                               //Implement WFI as a nop 
+      `WFI    : pd_instr = `INSTR_NOP;                               // Implement WFI as a nop 
       default : if (is_32bit_instruction) pd_instr = active_parcel;
-                else                      pd_instr = -1;             //Illegal
+                else                      pd_instr = -1;             // Illegal
     endcase
   end
 
@@ -239,7 +239,7 @@ module riscv_if #(
     else if (!id_stall) if_bubble <= pd_bubble;
   end
 
-  //Branches & Jump
+  // Branches & Jump
   assign immB = {{XLEN-12{pd_instr[31]}},                pd_instr[ 7],pd_instr[30:25],pd_instr[11: 8],1'b0};
   assign immJ = {{XLEN-20{pd_instr[31]}},pd_instr[19:12],pd_instr[20],pd_instr[30:25],pd_instr[24:21],1'b0};
 
@@ -253,8 +253,8 @@ module riscv_if #(
         branch_pc    = pd_pc + immJ;
       end
       {1'b0,`OPC_BRANCH} : begin
-        //if this CPU has a Branch Predict Unit, then use it's prediction
-        //otherwise assume backwards jumps taken, forward jumps not taken
+        // if this CPU has a Branch Predict Unit, then use it's prediction
+        // otherwise assume backwards jumps taken, forward jumps not taken
         branch_taken = `HAS_BPU ? bp_bp_predict[1] : immB[31];
         branch_pc    = pd_pc + immB;
       end
@@ -270,9 +270,9 @@ module riscv_if #(
     else if (!id_stall) if_bp_predict <= (`HAS_BPU) ? bp_bp_predict : {branch_taken,1'b0};
   end
 
-  //Exceptions
+  // Exceptions
 
-  //parcel-fetch
+  // parcel-fetch
   always @(posedge clk,negedge rstn) begin
     if      (!rstn                     ) parcel_exception <= 'h0;
     else if ( flushes                  ) parcel_exception <= 'h0;
@@ -283,14 +283,14 @@ module riscv_if #(
     end
   end
 
-  //pre-decode
+  // pre-decode
   always @(posedge clk,negedge rstn) begin
     if      (!rstn                     ) pd_exception <= 'h0;
     else if ( flushes                  ) pd_exception <= 'h0;
     else if ( parcel_valid && !id_stall) pd_exception <= parcel_exception;
   end
 
-  //instruction-fetch
+  // instruction-fetch
   always @(posedge clk,negedge rstn) begin
     if      (!rstn                     ) if_exception <= 'h0;
     else if ( flushes                  ) if_exception <= 'h0;

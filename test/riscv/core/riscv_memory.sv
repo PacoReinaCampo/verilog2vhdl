@@ -56,11 +56,11 @@ module riscv_memory #(
 
     input                           wb_stall,
 
-    //Program counter
+    // Program counter
     input      [XLEN          -1:0] ex_pc,
     output reg [XLEN          -1:0] mem_pc,
 
-    //Instruction
+    // Instruction
     input                           ex_bubble,
     input      [ILEN          -1:0] ex_instr,
     output reg                      mem_bubble,
@@ -70,10 +70,10 @@ module riscv_memory #(
     input      [EXCEPTION_SIZE-1:0] wb_exception,
     output reg [EXCEPTION_SIZE-1:0] mem_exception,
 
-    //From EX
+    // From EX
     input      [XLEN          -1:0] ex_r,
                                   dmem_adr,
-    //To WB
+    // To WB
     output reg [XLEN          -1:0] mem_r,
     output reg [XLEN          -1:0] mem_memadr
   );
@@ -83,13 +83,13 @@ module riscv_memory #(
   // Module Body
   //
 
-  //Program Counter
+  // Program Counter
   always @(posedge clk, negedge rstn) begin
     if      (!rstn    ) mem_pc <= PC_INIT;
     else if (!wb_stall) mem_pc <= ex_pc;
   end
 
-  //Instruction
+  // Instruction
   always @(posedge clk) begin
     if (!wb_stall) mem_instr <= ex_instr;
   end
@@ -99,7 +99,7 @@ module riscv_memory #(
     else if (!wb_stall) mem_bubble <= ex_bubble;
   end
 
-  //Data
+  // Data
   always @(posedge clk) begin
     if (!wb_stall) mem_r <= ex_r;
   end
@@ -108,7 +108,7 @@ module riscv_memory #(
     if (!wb_stall) mem_memadr <= dmem_adr;
   end
 
-  //Exception
+  // Exception
   always @(posedge clk, negedge rstn) begin
     if      (!rstn    )     mem_exception <= 'h0;
     else if (|mem_exception ||

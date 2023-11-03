@@ -57,7 +57,7 @@ module riscv_ahb2axi #(
     input scan_mode,
     input bus_clk_en,
 
-    //AXI4 instruction
+    // AXI4 instruction
     output reg   [AXI_ID_WIDTH  -1:0] axi4_aw_id,
     output reg   [AXI_ADDR_WIDTH-1:0] axi4_aw_addr,
     output reg   [               7:0] axi4_aw_len,
@@ -176,7 +176,7 @@ module riscv_ahb2axi #(
   logic [AHB_DATA_WIDTH-1:0] ahb3_hwdata_q;
   logic                      ahb3_hresp_q;
 
-  //Miscellaneous signals
+  // Miscellaneous signals
   logic                      ahb3_addr_in_dccm, ahb3_addr_in_iccm, ahb3_addr_in_pic;
   logic                      ahb3_addr_in_dccm_region_nc, ahb3_addr_in_iccm_region_nc, ahb3_addr_in_pic_region_nc;
 

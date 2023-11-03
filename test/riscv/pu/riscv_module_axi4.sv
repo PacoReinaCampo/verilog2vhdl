@@ -68,23 +68,23 @@ module riscv_module_ahb3 #(
 
   parameter            MULT_LATENCY       = 1,
 
-  parameter            BREAKPOINTS        = 8,  //Number of hardware breakpoints
+  parameter            BREAKPOINTS        = 8,  // Number of hardware breakpoints
 
   parameter            PMA_CNT            = 4,
-  parameter            PMP_CNT            = 16, //Number of Physical Memory Protection entries
+  parameter            PMP_CNT            = 16, // Number of Physical Memory Protection entries
 
   parameter            BP_GLOBAL_BITS     = 2,
   parameter            BP_LOCAL_BITS      = 10,
   parameter            BP_LOCAL_BITS_LSB  = 2,
 
-  parameter            ICACHE_SIZE        = 32,  //in KBytes
-  parameter            ICACHE_BLOCK_SIZE  = 32,  //in Bytes
+  parameter            ICACHE_SIZE        = 32,  // in KBytes
+  parameter            ICACHE_BLOCK_SIZE  = 32,  // in Bytes
   parameter            ICACHE_WAYS        = 2,   //'n'-way set associative
   parameter            ICACHE_REPLACE_ALG = 0,
   parameter            ITCM_SIZE          = 0,
 
-  parameter            DCACHE_SIZE        = 32,  //in KBytes
-  parameter            DCACHE_BLOCK_SIZE  = 32,  //in Bytes
+  parameter            DCACHE_SIZE        = 32,  // in KBytes
+  parameter            DCACHE_BLOCK_SIZE  = 32,  // in Bytes
   parameter            DCACHE_WAYS        = 2,   //'n'-way set associative
   parameter            DCACHE_REPLACE_ALG = 0,
   parameter            DTCM_SIZE          = 0,
@@ -112,7 +112,7 @@ module riscv_module_ahb3 #(
     input wire  [PMA_CNT-1:0][    13:0] pma_cfg_i,
     input wire  [PMA_CNT-1:0][XLEN-1:0] pma_adr_i,
 
-    //AXI4 instruction
+    // AXI4 instruction
     output reg   [AXI_ID_WIDTH    -1:0] axi4_ins_aw_id,
     output reg   [AXI_ADDR_WIDTH  -1:0] axi4_ins_aw_addr,
     output reg   [                 7:0] axi4_ins_aw_len,
@@ -162,7 +162,7 @@ module riscv_module_ahb3 #(
     input  wire                         axi4_ins_b_valid,
     output reg                          axi4_ins_b_ready,
 
-    //AXI4 data
+    // AXI4 data
     output reg   [AXI_ID_WIDTH    -1:0] axi4_dat_aw_id,
     output reg   [AXI_ADDR_WIDTH  -1:0] axi4_dat_aw_addr,
     output reg   [                 7:0] axi4_dat_aw_len,
@@ -212,13 +212,13 @@ module riscv_module_ahb3 #(
     input  wire                         axi4_dat_b_valid,
     output reg                          axi4_dat_b_ready,
 
-    //Interrupts
+    // Interrupts
     input                               ext_nmi,
                                         ext_tint,
                                         ext_sint,
     input           [              3:0] ext_int,
 
-    //Debug Interface
+    // Debug Interface
     input                               dbg_stall,
     input                               dbg_strb,
     input                               dbg_we,
@@ -234,7 +234,7 @@ module riscv_module_ahb3 #(
   // Module Body
   //
 
-  //Instantiate RISC-V PU
+  // Instantiate RISC-V PU
   riscv_pu_ahb3 #(
     .XLEN               (XLEN),
     .PLEN               (PLEN),
@@ -252,23 +252,23 @@ module riscv_module_ahb3 #(
 
     .MULT_LATENCY       (MULT_LATENCY),
 
-    .BREAKPOINTS        (BREAKPOINTS),  //Number of hardware breakpoints
+    .BREAKPOINTS        (BREAKPOINTS),  // Number of hardware breakpoints
 
     .PMA_CNT            (PMA_CNT),
-    .PMP_CNT            (PMP_CNT),  //Number of Physical Memory Protection entries
+    .PMP_CNT            (PMP_CNT),  // Number of Physical Memory Protection entries
 
     .BP_GLOBAL_BITS     (BP_GLOBAL_BITS),
     .BP_LOCAL_BITS      (BP_LOCAL_BITS),
     .BP_LOCAL_BITS_LSB  (BP_LOCAL_BITS_LSB),
 
-    .ICACHE_SIZE        (ICACHE_SIZE),  //in KBytes
-    .ICACHE_BLOCK_SIZE  (ICACHE_BLOCK_SIZE),  //in Bytes
+    .ICACHE_SIZE        (ICACHE_SIZE),  // in KBytes
+    .ICACHE_BLOCK_SIZE  (ICACHE_BLOCK_SIZE),  // in Bytes
     .ICACHE_WAYS        (ICACHE_WAYS),  //'n'-way set associative
     .ICACHE_REPLACE_ALG (ICACHE_REPLACE_ALG),
     .ITCM_SIZE          (ITCM_SIZE),
 
-    .DCACHE_SIZE        (DCACHE_SIZE),  //in KBytes
-    .DCACHE_BLOCK_SIZE  (DCACHE_BLOCK_SIZE),  //in Bytes
+    .DCACHE_SIZE        (DCACHE_SIZE),  // in KBytes
+    .DCACHE_BLOCK_SIZE  (DCACHE_BLOCK_SIZE),  // in Bytes
     .DCACHE_WAYS        (DCACHE_WAYS),  //'n'-way set associative
     .DCACHE_REPLACE_ALG (DCACHE_REPLACE_ALG),
     .DTCM_SIZE          (DTCM_SIZE),
@@ -296,7 +296,7 @@ module riscv_module_ahb3 #(
     .pma_cfg_i (pma_cfg_i),
     .pma_adr_i (pma_adr_i),
 
-    //AXI4 instruction
+    // AXI4 instruction
     .axi4_ins_aw_id     (axi4_ins_aw_id),
     .axi4_ins_aw_addr   (axi4_ins_aw_addr),
     .axi4_ins_aw_len    (axi4_ins_aw_len),
@@ -346,7 +346,7 @@ module riscv_module_ahb3 #(
     .axi4_ins_b_valid   (axi4_ins_b_valid),
     .axi4_ins_b_ready   (axi4_ins_b_ready),
  
-    //AXI4 data
+    // AXI4 data
     .axi4_dat_aw_id     (axi4_dat_aw_id),
     .axi4_dat_aw_addr   (axi4_dat_aw_addr),
     .axi4_dat_aw_len    (axi4_dat_aw_len),
@@ -396,13 +396,13 @@ module riscv_module_ahb3 #(
     .axi4_dat_b_valid   (axi4_dat_b_valid),
     .axi4_dat_b_ready   (axi4_dat_b_ready),
 
-    //Interrupts
+    // Interrupts
     .ext_nmi  (ext_nmi),
     .ext_tint (ext_tint),
     .ext_sint (ext_sint),
     .ext_int  (ext_int),
 
-    //Debug Interface
+    // Debug Interface
     .dbg_stall (dbg_stall),
     .dbg_strb  (dbg_strb),
     .dbg_we    (dbg_we),

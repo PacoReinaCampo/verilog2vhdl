@@ -59,23 +59,23 @@ module riscv_pu_ahb3 #(
 
   parameter            MULT_LATENCY       = 1,
 
-  parameter            BREAKPOINTS        = 8,  //Number of hardware breakpoints
+  parameter            BREAKPOINTS        = 8,  // Number of hardware breakpoints
 
   parameter            PMA_CNT            = 4,
-  parameter            PMP_CNT            = 16, //Number of Physical Memory Protection entries
+  parameter            PMP_CNT            = 16, // Number of Physical Memory Protection entries
 
   parameter            BP_GLOBAL_BITS     = 2,
   parameter            BP_LOCAL_BITS      = 10,
   parameter            BP_LOCAL_BITS_LSB  = 2,
 
-  parameter            ICACHE_SIZE        = 64,  //in KBytes
-  parameter            ICACHE_BLOCK_SIZE  = 64,  //in Bytes
+  parameter            ICACHE_SIZE        = 64,  // in KBytes
+  parameter            ICACHE_BLOCK_SIZE  = 64,  // in Bytes
   parameter            ICACHE_WAYS        = 2,   //'n'-way set associative
   parameter            ICACHE_REPLACE_ALG = 0,
   parameter            ITCM_SIZE          = 0,
 
-  parameter            DCACHE_SIZE        = 64,  //in KBytes
-  parameter            DCACHE_BLOCK_SIZE  = 64,  //in Bytes
+  parameter            DCACHE_SIZE        = 64,  // in KBytes
+  parameter            DCACHE_BLOCK_SIZE  = 64,  // in Bytes
   parameter            DCACHE_WAYS        = 2,   //'n'-way set associative
   parameter            DCACHE_REPLACE_ALG = 0,
   parameter            DTCM_SIZE          = 0,
@@ -103,7 +103,7 @@ module riscv_pu_ahb3 #(
     input wire  [PMA_CNT-1:0][    13:0] pma_cfg_i,
     input wire  [PMA_CNT-1:0][XLEN-1:0] pma_adr_i,
 
-    //AHB3 instruction
+    // AHB3 instruction
     output                              ins_HSEL,
     output                   [PLEN-1:0] ins_HADDR,
     output                   [XLEN-1:0] ins_HWDATA,
@@ -117,7 +117,7 @@ module riscv_pu_ahb3 #(
     input                               ins_HREADY,
     input                               ins_HRESP,
 
-    //AHB3 data
+    // AHB3 data
     output                              dat_HSEL,
     output                   [PLEN-1:0] dat_HADDR,
     output                   [XLEN-1:0] dat_HWDATA,
@@ -131,13 +131,13 @@ module riscv_pu_ahb3 #(
     input                               dat_HREADY,
     input                               dat_HRESP,
 
-    //Interrupts
+    // Interrupts
     input                               ext_nmi,
                                         ext_tint,
                                         ext_sint,
     input                    [     3:0] ext_int,
 
-    //Debug Interface
+    // Debug Interface
     input                               dbg_stall,
     input                               dbg_strb,
     input                               dbg_we,
@@ -180,7 +180,7 @@ module riscv_pu_ahb3 #(
   logic                               cacheflush,
                                       dcflush_rdy;
 
-  //Instruction Memory BIU connections
+  // Instruction Memory BIU connections
   logic                               ibiu_stb;
   logic                               ibiu_stb_ack;
   logic                               ibiu_d_ack;
@@ -195,7 +195,7 @@ module riscv_pu_ahb3 #(
   logic          [XLEN          -1:0] ibiu_q;
   logic                               ibiu_ack,
                                       ibiu_err;
-  //Data Memory BIU connections
+  // Data Memory BIU connections
   logic                               dbiu_stb;
   logic                               dbiu_stb_ack;
   logic                               dbiu_d_ack;
@@ -216,7 +216,7 @@ module riscv_pu_ahb3 #(
   // Module Body
   //
 
-  //Instantiate RISC-V core
+  // Instantiate RISC-V core
   riscv_core #(
     .XLEN                  ( XLEN                  ),
     .PLEN                  ( PLEN                  ),
@@ -298,9 +298,9 @@ module riscv_pu_ahb3 #(
     .dbg_bp               ( dbg_bp               )
   ); 
 
-  //Instantiate bus interfaces and optional caches
+  // Instantiate bus interfaces and optional caches
 
-  //Instruction Memory Access Block
+  // Instruction Memory Access Block
   riscv_imem_ctrl #(
     .XLEN (XLEN),
     .PLEN (PLEN),
@@ -361,7 +361,7 @@ module riscv_pu_ahb3 #(
     .biu_err_i        ( ibiu_err         )
   );
 
-  //Data Memory Access Block
+  // Data Memory Access Block
   riscv_dmem_ctrl #(
     .XLEN (XLEN),
     .PLEN (PLEN),
@@ -421,7 +421,7 @@ module riscv_pu_ahb3 #(
     .biu_err_i        ( dbiu_err         )
   );
 
-  //Instantiate BIU
+  // Instantiate BIU
   riscv_biu2ahb3 #(
     .XLEN ( XLEN ),
     .PLEN ( PLEN )

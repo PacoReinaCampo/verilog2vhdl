@@ -74,8 +74,8 @@ module riscv_state #(
   parameter            JEDEC_BANK            = 9,
   parameter            JEDEC_MANUFACTURER_ID = 'h8a,
 
-  parameter            PMP_CNT               = 16,    //number of PMP CSR blocks (max.16)
-  parameter            HARTID                = 0      //hardware thread-id
+  parameter            PMP_CNT               = 16,    // number of PMP CSR blocks (max.16)
+  parameter            HARTID                = 0      // hardware thread-id
 )
   (
     input                                 rstn,
@@ -98,34 +98,34 @@ module riscv_state #(
     input            [XLEN          -1:0] wb_badaddr,
 
     output reg                            st_interrupt,
-    output reg       [               1:0] st_prv,        //Privilege level
-    output reg       [               1:0] st_xlen,       //Active Architecture
-    output                                st_tvm,        //trap on satp access or SFENCE.VMA
-    output                                st_tw,         //trap on WFI (after time >=0)
-    output                                st_tsr,        //trap SRET
+    output reg       [               1:0] st_prv,        // Privilege level
+    output reg       [               1:0] st_xlen,       // Active Architecture
+    output                                st_tvm,        // trap on satp access or SFENCE.VMA
+    output                                st_tw,         // trap on WFI (after time >=0)
+    output                                st_tsr,        // trap SRET
     output           [XLEN          -1:0] st_mcounteren,
     output           [XLEN          -1:0] st_scounteren,
     output [PMP_CNT-1:0][            7:0] st_pmpcfg,
     output [PMP_CNT-1:0][XLEN       -1:0] st_pmpaddr,
 
 
-    //interrupts (3=M-mode, 0=U-mode)
-    input            [               3:0] ext_int,       //external interrupt (per privilege mode; determined by PIC)
-    input                                 ext_tint,      //machine timer interrupt
-    input                                 ext_sint,      //machine software interrupt (for ipi)
-    input                                 ext_nmi,       //non-maskable interrupt
+    // interrupts (3=M-mode, 0=U-mode)
+    input            [               3:0] ext_int,       // external interrupt (per privilege mode; determined by PIC)
+    input                                 ext_tint,      // machine timer interrupt
+    input                                 ext_sint,      // machine software interrupt (for ipi)
+    input                                 ext_nmi,       // non-maskable interrupt
 
-    //CSR interface
+    // CSR interface
     input            [              11:0] ex_csr_reg,
     input                                 ex_csr_we,
     input            [XLEN          -1:0] ex_csr_wval,
     output reg       [XLEN          -1:0] st_csr_rval,
 
-    //Debug interface
+    // Debug interface
     input                                 du_stall,
     input                                 du_flush,
     input                                 du_we_csr,
-    input            [XLEN          -1:0] du_dato,       //output from debug unit
+    input            [XLEN          -1:0] du_dato,       // output from debug unit
     input            [              11:0] du_addr,
     input            [              31:0] du_ie,
     output           [              31:0] du_exceptions
@@ -154,100 +154,100 @@ module riscv_state #(
   //
   // Variables
   //
-  //Floating point registers
+  // Floating point registers
   logic  [2      :0] csr_fcsr_rm;
   logic  [4      :0] csr_fcsr_flags;
 
   logic  [7      :0] csr_fcsr;
 
-  //User trap setup
+  // User trap setup
   logic  [XLEN -1:0] csr_utvec;
 
-  //User trap handler
-  logic  [XLEN -1:0] csr_uscratch;   //scratch register
-  logic  [XLEN -1:0] csr_uepc;       //exception program counter
-  logic  [XLEN -1:0] csr_ucause;     //trap cause
-  logic  [XLEN -1:0] csr_utval;      //bad address
+  // User trap handler
+  logic  [XLEN -1:0] csr_uscratch;   // scratch register
+  logic  [XLEN -1:0] csr_uepc;       // exception program counter
+  logic  [XLEN -1:0] csr_ucause;     // trap cause
+  logic  [XLEN -1:0] csr_utval;      // bad address
 
-  //Supervisor
+  // Supervisor
 
-  //Supervisor trap setup
-  logic  [XLEN -1:0] csr_stvec;      //trap handler base address
-  logic  [XLEN -1:0] csr_scounteren; //Enable performance counters for lower privilege level
-  logic  [XLEN -1:0] csr_sedeleg;    //trap delegation register
+  // Supervisor trap setup
+  logic  [XLEN -1:0] csr_stvec;      // trap handler base address
+  logic  [XLEN -1:0] csr_scounteren; // Enable performance counters for lower privilege level
+  logic  [XLEN -1:0] csr_sedeleg;    // trap delegation register
 
-  //Supervisor trap handler
-  logic  [XLEN -1:0] csr_sscratch;   //scratch register
-  logic  [XLEN -1:0] csr_sepc;       //exception program counter
-  logic  [XLEN -1:0] csr_scause;     //trap cause
-  logic  [XLEN -1:0] csr_stval;      //bad address
+  // Supervisor trap handler
+  logic  [XLEN -1:0] csr_sscratch;   // scratch register
+  logic  [XLEN -1:0] csr_sepc;       // exception program counter
+  logic  [XLEN -1:0] csr_scause;     // trap cause
+  logic  [XLEN -1:0] csr_stval;      // bad address
 
-  //Supervisor protection and Translation
-  logic  [XLEN -1:0] csr_satp;       //Address translation & protection
+  // Supervisor protection and Translation
+  logic  [XLEN -1:0] csr_satp;       // Address translation & protection
 
 /*
-  //Hypervisor
-  //Hypervisor Trap Setup
-  logic  [XLEN-1:0] csr_htvec;    //trap handler base address
-  logic  [XLEN-1:0] csr_hedeleg;  //trap delegation register
+  // Hypervisor
+  // Hypervisor Trap Setup
+  logic  [XLEN-1:0] csr_htvec;    // trap handler base address
+  logic  [XLEN-1:0] csr_hedeleg;  // trap delegation register
 
-  //Hypervisor trap handler
-  logic  [XLEN-1:0] csr_hscratch; //scratch register
-  logic  [XLEN-1:0] csr_hepc;     //exception program counter
-  logic  [XLEN-1:0] csr_hcause;   //trap cause
-  logic  [XLEN-1:0] csr_htval;    //bad address
+  // Hypervisor trap handler
+  logic  [XLEN-1:0] csr_hscratch; // scratch register
+  logic  [XLEN-1:0] csr_hepc;     // exception program counter
+  logic  [XLEN-1:0] csr_hcause;   // trap cause
+  logic  [XLEN-1:0] csr_htval;    // bad address
 
-  //Hypervisor protection and Translation
-  //TBD per spec v1.7, somewhat defined in 1.9, removed in 1.10
+  // Hypervisor protection and Translation
+  // TBD per spec v1.7, somewhat defined in 1.9, removed in 1.10
  */
 
   // Machine
-  logic  [7      :0] csr_mvendorid_bank;    //Vendor-ID
-  logic  [6      :0] csr_mvendorid_offset;  //Vendor-ID
+  logic  [7      :0] csr_mvendorid_bank;    // Vendor-ID
+  logic  [6      :0] csr_mvendorid_offset;  // Vendor-ID
 
   logic  [14     :0] csr_mvendorid;
 
-  logic  [XLEN -1:0] csr_marchid;    //Architecture ID
-  logic  [XLEN -1:0] csr_mimpid;     //Revision number
-  logic  [XLEN -1:0] csr_mhartid;    //Hardware Thread ID
+  logic  [XLEN -1:0] csr_marchid;    // Architecture ID
+  logic  [XLEN -1:0] csr_mimpid;     // Revision number
+  logic  [XLEN -1:0] csr_mhartid;    // Hardware Thread ID
 
-  //Machine Trap Setup
+  // Machine Trap Setup
   logic              csr_mstatus_sd;
-  logic  [1      :0] csr_mstatus_sxl;  //S-Mode XLEN
-  logic  [1      :0] csr_mstatus_uxl;  //U-Mode XLEN
-//logic  [4      :0] csr_mstatus_vm;   //virtualisation management
+  logic  [1      :0] csr_mstatus_sxl;  // S-Mode XLEN
+  logic  [1      :0] csr_mstatus_uxl;  // U-Mode XLEN
+// logic  [4      :0] csr_mstatus_vm;   // virtualisation management
   logic              csr_mstatus_tsr;
   logic              csr_mstatus_tw;
   logic              csr_mstatus_tvm;
   logic              csr_mstatus_mxr;
   logic              csr_mstatus_sum;
-  logic              csr_mstatus_mprv;  //memory privilege
+  logic              csr_mstatus_mprv;  // memory privilege
 
-  logic  [1      :0] csr_mstatus_xs;    //user extension status
-  logic  [1      :0] csr_mstatus_fs;    //floating point status
+  logic  [1      :0] csr_mstatus_xs;    // user extension status
+  logic  [1      :0] csr_mstatus_fs;    // floating point status
 
   logic  [1      :0] csr_mstatus_mpp; 
-  logic  [1      :0] csr_mstatus_hpp;   //previous privilege levels
-  logic              csr_mstatus_spp;   //supervisor previous privilege level
+  logic  [1      :0] csr_mstatus_hpp;   // previous privilege levels
+  logic              csr_mstatus_spp;   // supervisor previous privilege level
   logic              csr_mstatus_mpie;
   logic              csr_mstatus_hpie;
   logic              csr_mstatus_spie;
-  logic              csr_mstatus_upie;  //previous interrupt enable bits
+  logic              csr_mstatus_upie;  // previous interrupt enable bits
   logic              csr_mstatus_mie;
   logic              csr_mstatus_hie;
   logic              csr_mstatus_sie;
-  logic              csr_mstatus_uie;   //interrupt enable bits (per privilege level) 
+  logic              csr_mstatus_uie;   // interrupt enable bits (per privilege level) 
 
-  logic  [1      :0] csr_misa_base;     //Machine ISA
+  logic  [1      :0] csr_misa_base;     // Machine ISA
   logic  [25     :0] csr_misa_extensions;
 
   logic  [28     :0] csr_misa;
 
-  logic  [XLEN -1:0] csr_mnmivec;    //ROALOGIC NMI handler base address
-  logic  [XLEN -1:0] csr_mtvec;      //trap handler base address
-  logic  [XLEN -1:0] csr_mcounteren; //Enable performance counters for lower level
-  logic  [XLEN -1:0] csr_medeleg;    //Exception delegation
-  logic  [XLEN -1:0] csr_mideleg;    //Interrupt delegation
+  logic  [XLEN -1:0] csr_mnmivec;    // ROALOGIC NMI handler base address
+  logic  [XLEN -1:0] csr_mtvec;      // trap handler base address
+  logic  [XLEN -1:0] csr_mcounteren; // Enable performance counters for lower level
+  logic  [XLEN -1:0] csr_medeleg;    // Exception delegation
+  logic  [XLEN -1:0] csr_mideleg;    // Interrupt delegation
 
   logic              csr_mie_meie;
   logic              csr_mie_heie;
@@ -262,13 +262,13 @@ module riscv_state #(
   logic              csr_mie_ssie;
   logic              csr_mie_usie;
 
-  logic  [11     :0] csr_mie;  //interrupt enable
+  logic  [11     :0] csr_mie;  // interrupt enable
 
-  //Machine trap handler
-  logic  [XLEN -1:0] csr_mscratch;   //scratch register
-  logic  [XLEN -1:0] csr_mepc;       //exception program counter
-  logic  [XLEN -1:0] csr_mcause;     //trap cause
-  logic  [XLEN -1:0] csr_mtval;      //bad address
+  // Machine trap handler
+  logic  [XLEN -1:0] csr_mscratch;   // scratch register
+  logic  [XLEN -1:0] csr_mepc;       // exception program counter
+  logic  [XLEN -1:0] csr_mcause;     // trap cause
+  logic  [XLEN -1:0] csr_mtval;      // bad address
 
   logic              csr_mip_meip;
   logic              csr_mip_heip;
@@ -283,20 +283,20 @@ module riscv_state #(
   logic              csr_mip_ssip;
   logic              csr_mip_usip;
 
-  logic  [11     :0] csr_mip;  //interrupt pending
+  logic  [11     :0] csr_mip;  // interrupt pending
 
-  //Machine protection and Translation
+  // Machine protection and Translation
   logic  [PMP_CNT-1:0][     7:0] csr_pmpcfg;
   logic  [PMP_CNT-1:0][XLEN-1:0] csr_pmpaddr;
 
-  //Machine counters/Timers
-  logic  [31     :0] csr_mcycle_h;   //timer for `MCYCLE
-  logic  [31     :0] csr_mcycle_l;   //timer for `MCYCLE
+  // Machine counters/Timers
+  logic  [31     :0] csr_mcycle_h;   // timer for `MCYCLE
+  logic  [31     :0] csr_mcycle_l;   // timer for `MCYCLE
 
   logic  [63     :0] csr_mcycle;
 
-  logic  [31     :0] csr_minstret_h;   //instruction retire count for `MINSTRET
-  logic  [31     :0] csr_minstret_l;   //instruction retire count for `MINSTRET
+  logic  [31     :0] csr_minstret_h;   // instruction retire count for `MINSTRET
+  logic  [31     :0] csr_minstret_l;   // instruction retire count for `MINSTRET
 
   logic  [63     :0] csr_minstret;
 
@@ -322,12 +322,12 @@ module riscv_state #(
   logic             has_h;
   logic             has_ext;
 
-  logic [    127:0] mstatus;      //mstatus is special (can be larger than 32bits)
-  logic [      1:0] uxl_wval;     //u/sxl are taken from bits 35:32
-  logic [      1:0] sxl_wval;     //and can only have limited values
+  logic [    127:0] mstatus;      // mstatus is special (can be larger than 32bits)
+  logic [      1:0] uxl_wval;     // u/sxl are taken from bits 35:32
+  logic [      1:0] sxl_wval;     // and can only have limited values
 
-  logic             soft_seip;    //software supervisor-external-interrupt
-  logic             soft_ueip;    //software user-external-interrupt
+  logic             soft_seip;    // software supervisor-external-interrupt
+  logic             soft_ueip;    // software user-external-interrupt
 
   logic             take_interrupt;
 
@@ -335,11 +335,11 @@ module riscv_state #(
   logic [      3:0] interrupt_cause;
   logic [      3:0] trap_cause;
 
-  //Mux for debug-unit
-  logic [     11:0] csr_raddr;    //CSR read address
-  logic [XLEN -1:0] csr_wval;     //CSR write value
+  // Mux for debug-unit
+  logic [     11:0] csr_raddr;    // CSR read address
+  logic [XLEN -1:0] csr_wval;     // CSR write value
 
-  genvar            idx;          //a-z are used by 'misa'
+  genvar            idx;          // a-z are used by 'misa'
 
   ////////////////////////////////////////////////////////////////
   //
@@ -357,7 +357,7 @@ module riscv_state #(
   assign has_n     = (HAS_RVN    !=   0) & has_u;
   assign has_u     = (HAS_USER   !=   0);
   assign has_s     = (HAS_SUPER  !=   0) & has_u;
-  assign has_h     = 1'b0;  //(HAS_HYPER  !=   0) & has_s;   //No Hypervisor
+  assign has_h     = 1'b0;  //(HAS_HYPER  !=   0) & has_s;   // No Hypervisor
 
   assign has_rvc   = (HAS_RVC    !=   0);
   assign has_fpu   = (HAS_FPU    !=   0);
@@ -372,14 +372,14 @@ module riscv_state #(
   assign has_simd  = (HAS_RVP    !=   0);
   assign has_ext   = (HAS_EXT    !=   0);
 
-  //Mux address/data for Debug-Unit access
+  // Mux address/data for Debug-Unit access
   assign csr_raddr = du_stall ? du_addr : ex_csr_reg;
   assign csr_wval  = du_stall ? du_dato : ex_csr_wval;
 
-  //Priviliged Control Registers
+  // Priviliged Control Registers
 
-  //mstatus has different values for RV32 and RV64/RV128
-  //treat it here as though it is a 128bit register
+  // mstatus has different values for RV32 and RV64/RV128
+  // treat it here as though it is a 128bit register
   assign mstatus = {csr_mstatus_sd,
                     {128-37{1'b0}},
                     csr_mstatus_sxl,
@@ -405,10 +405,10 @@ module riscv_state #(
                     csr_mstatus_sie,
                     csr_mstatus_uie};
 
-  //Read
+  // Read
   always @(*) begin
     case (csr_raddr)
-      //User
+      // User
       `USTATUS   : st_csr_rval = {mstatus[127],mstatus[XLEN-2:0]} & 'h11;
       `UIE       : st_csr_rval = has_n ? csr_mie & 12'h111               : 'h0;
       `UTVEC     : st_csr_rval = has_n ? csr_utvec                       : 'h0;
@@ -428,7 +428,7 @@ module riscv_state #(
     //`TIMEH     : st_csr_rval = is_rv32 ? csr_timer_h    : 'h0;
       `INSTRETH  : st_csr_rval = is_rv32 ? csr_minstret_h : 'h0;
 
-      //Supervisor
+      // Supervisor
       `SSTATUS   : st_csr_rval = {mstatus[127],mstatus[XLEN-2:0]} & (1 << XLEN-1 | 2'b11 << 32 | 'hde133);
       `STVEC     : st_csr_rval = has_s            ? csr_stvec                       : 'h0;
       `SCOUNTEREN: st_csr_rval = has_s            ? csr_scounteren                  : 'h0;
@@ -442,7 +442,7 @@ module riscv_state #(
       `SIP       : st_csr_rval = has_s            ? csr_mip & csr_mideleg & 12'h333 : 'h0;
       `SATP      : st_csr_rval = has_s && has_mmu ? csr_satp                        : 'h0;
 /*
-      //Hypervisor
+      // Hypervisor
       HSTATUS   : st_csr_rval = {mstatus[127],mstatus[XLEN-2:0] & (1 << XLEN-1 | 2'b11 << 32 | 'hde133);
       HTVEC     : st_csr_rval = has_h ? csr_htvec                       : 'h0;
       HIE       : st_csr_rval = has_h ? csr_mie & 12'h777               : 'h0;
@@ -454,7 +454,7 @@ module riscv_state #(
       HTVAL     : st_csr_rval = has_h ? csr_htval                       : 'h0;
       HIP       : st_csr_rval = has_h ? csr_mip & csr_mideleg & 12'h777 : 'h0;
  */
-      //Machine
+      // Machine
       `MISA      : st_csr_rval = {csr_misa_base, {XLEN-$bits(csr_misa){1'b0}}, csr_misa_extensions};
       `MVENDORID : st_csr_rval = {{XLEN-$bits(csr_mvendorid){1'b0}}, csr_mvendorid};
       `MARCHID   : st_csr_rval = csr_marchid;
@@ -505,26 +505,26 @@ module riscv_state #(
   // Machine registers
   //
   assign csr_misa_base       = is_rv128 ? `RV128I : is_rv64 ? `RV64I : `RV32I;
-  assign csr_misa_extensions = { 1'b0,       //reserved
-                                 1'b0,       //reserved
+  assign csr_misa_extensions = { 1'b0,       // reserved
+                                 1'b0,       // reserved
                                  has_ext,    
-                                 1'b0,       //reserved
-                                 1'b0,       //reserved for vector extensions
-                                 has_u,      //user mode supported
+                                 1'b0,       // reserved
+                                 1'b0,       // reserved for vector extensions
+                                 has_u,      // user mode supported
                                  has_tmem,
-                                 has_s,      //supervisor mode supported
-                                 1'b0,       //reserved
+                                 has_s,      // supervisor mode supported
+                                 1'b0,       // reserved
                                  has_fpuq,
                                  has_simd,
-                                 1'b0,       //reserved
+                                 1'b0,       // reserved
                                  has_n,
                                  has_muldiv,
                                  has_decfpu,
-                                 1'b0,       //reserved
-                                 1'b0,       //reserved for JIT
+                                 1'b0,       // reserved
+                                 1'b0,       // reserved for JIT
                                  ~is_rv32e,
-                                 1'b0,       //reserved
-                                 1'b0,       //additional extensions
+                                 1'b0,       // reserved
+                                 1'b0,       // additional extensions
                                  has_fpu,
                                  is_rv32e,
                                  has_fpud,
@@ -541,7 +541,7 @@ module riscv_state #(
   assign csr_mimpid[     7: 0] = `REVUSR_MINOR;
   assign csr_mhartid           = `HARTID;
 
-  //mstatus
+  // mstatus
   assign csr_mstatus_sd = &csr_mstatus_fs | &csr_mstatus_xs;
 
   assign st_tvm = csr_mstatus_tvm;
@@ -573,11 +573,11 @@ module riscv_state #(
 
   always @(posedge clk,negedge rstn) begin
     if (!rstn) begin
-      st_prv           <= `PRV_M;    //start in machine mode
+      st_prv           <= `PRV_M;    // start in machine mode
       st_nxt_pc        <= PC_INIT;
       st_flush         <= 1'b1;
 
-    //csr_mstatus_vm   <= VM_MBARE;
+    // csr_mstatus_vm   <= VM_MBARE;
       csr_mstatus_sxl  <= has_s ? csr_misa_base : 2'b00;
       csr_mstatus_uxl  <= has_u ? csr_misa_base : 2'b00;
       csr_mstatus_tsr  <= 1'b0;
@@ -590,21 +590,21 @@ module riscv_state #(
       csr_mstatus_fs   <= 2'b00;
 
       csr_mstatus_mpp  <= 2'h3;
-      csr_mstatus_hpp  <= 2'h0;  //reserved
+      csr_mstatus_hpp  <= 2'h0;  // reserved
       csr_mstatus_spp  <= has_s;
       csr_mstatus_mpie <= 1'b0;
-      csr_mstatus_hpie <= 1'b0;  //reserved
+      csr_mstatus_hpie <= 1'b0;  // reserved
       csr_mstatus_spie <= 1'b0;
       csr_mstatus_upie <= 1'b0;
       csr_mstatus_mie  <= 1'b0;
-      csr_mstatus_hie  <= 1'b0;  //reserved
+      csr_mstatus_hie  <= 1'b0;  // reserved
       csr_mstatus_sie  <= 1'b0;
       csr_mstatus_uie  <= 1'b0;
     end
     else begin
       st_flush <= 1'b0;
 
-      //write from EX, Machine Mode
+      // write from EX, Machine Mode
       if ( (ex_csr_we && ex_csr_reg == `MSTATUS && st_prv == `PRV_M) ||
           (du_we_csr && du_addr    == `MSTATUS)                     ) begin
         //            csr_mstatus_vm    <= csr_wval[28:24];
@@ -616,31 +616,31 @@ module riscv_state #(
         csr_mstatus_mxr   <= has_s              ? csr_wval[19]    : 1'b0;
         csr_mstatus_sum   <= has_s              ? csr_wval[18]    : 1'b0;
         csr_mstatus_mprv  <= has_u              ? csr_wval[17]    : 1'b0;
-        csr_mstatus_xs    <= has_ext            ? csr_wval[16:15] : 2'b00; //TODO
-        csr_mstatus_fs    <= has_s && has_fpu   ? csr_wval[14:13] : 2'b00; //TODO
+        csr_mstatus_xs    <= has_ext            ? csr_wval[16:15] : 2'b00; // TODO
+        csr_mstatus_fs    <= has_s && has_fpu   ? csr_wval[14:13] : 2'b00; // TODO
 
         csr_mstatus_mpp   <=         csr_wval[12:11];
-        csr_mstatus_hpp   <= 2'h0;                              //reserved
+        csr_mstatus_hpp   <= 2'h0;                              // reserved
         csr_mstatus_spp   <= has_s ? csr_wval[   8] : 1'b0;
         csr_mstatus_mpie  <=         csr_wval[   7];
-        csr_mstatus_hpie  <= 1'b0;                              //reserved
+        csr_mstatus_hpie  <= 1'b0;                              // reserved
         csr_mstatus_spie  <= has_s ? csr_wval[   5] : 1'b0;
         csr_mstatus_upie  <= has_n ? csr_wval[   4] : 1'b0;
         csr_mstatus_mie   <=         csr_wval[   3];
-        csr_mstatus_hie   <= 1'b0;                              //reserved
+        csr_mstatus_hie   <= 1'b0;                              // reserved
         csr_mstatus_sie   <= has_s ? csr_wval[   1] : 1'b0;
         csr_mstatus_uie   <= has_n ? csr_wval[   0] : 1'b0;
       end
 
-      //Supervisor Mode access
+      // Supervisor Mode access
       if (has_s) begin
         if ( (ex_csr_we && ex_csr_reg == `SSTATUS && st_prv >= `PRV_S) ||
              (du_we_csr && du_addr    == `SSTATUS)                     ) begin
           csr_mstatus_uxl  <= uxl_wval;
           csr_mstatus_mxr  <= csr_wval[19];
           csr_mstatus_sum  <= csr_wval[18]; 
-          csr_mstatus_xs   <= has_ext ? csr_wval[16:15] : 2'b00; //TODO
-          csr_mstatus_fs   <= has_fpu ? csr_wval[14:13] : 2'b00; //TODO
+          csr_mstatus_xs   <= has_ext ? csr_wval[16:15] : 2'b00; // TODO
+          csr_mstatus_fs   <= has_fpu ? csr_wval[14:13] : 2'b00; // TODO
 
           csr_mstatus_spp  <= csr_wval[7];
           csr_mstatus_spie <= csr_wval[5];
@@ -650,66 +650,66 @@ module riscv_state #(
         end
       end
 
-      //MRET,HRET,SRET,URET
+      // MRET,HRET,SRET,URET
       if (!id_bubble && !bu_flush && !du_stall) begin
         case (id_instr)
-          //pop privilege stack
+          // pop privilege stack
           `MRET : begin
-            //set privilege level
+            // set privilege level
             st_prv    <= csr_mstatus_mpp;
             st_nxt_pc <= csr_mepc;
             st_flush  <= 1'b1;
 
-            //set `MIE
+            // set `MIE
             csr_mstatus_mie  <= csr_mstatus_mpie;
             csr_mstatus_mpie <= 1'b1;
             csr_mstatus_mpp  <= has_u ? `PRV_U : `PRV_M;
           end
 /*
           HRET : begin
-            //set privilege level
+            // set privilege level
             st_prv    <= csr_mstatus_hpp;
             st_nxt_pc <= csr_hepc;
             st_flush  <= 1'b1;
 
-            //set HIE
+            // set HIE
             csr_mstatus_hie  <= csr_mstatus_hpie;
             csr_mstatus_hpie <= 1'b1;
             csr_mstatus_hpp  <= has_u ? `PRV_U : `PRV_M;
           end
  */
           `SRET : begin
-            //set privilege level
+            // set privilege level
             st_prv    <= {1'b0,csr_mstatus_spp};
             st_nxt_pc <= csr_sepc;
             st_flush  <= 1'b1;
 
-            //set `SIE
+            // set `SIE
             csr_mstatus_sie  <= csr_mstatus_spie;
             csr_mstatus_spie <= 1'b1;
-            csr_mstatus_spp  <= 1'b0; //Must have User-mode. SPP is only 1 bit
+            csr_mstatus_spp  <= 1'b0; // Must have User-mode. SPP is only 1 bit
           end
           `URET : begin
-            //set privilege level
+            // set privilege level
             st_prv    <= `PRV_U;
             st_nxt_pc <= csr_uepc;
             st_flush  <= 1'b1;
 
-            //set `UIE
+            // set `UIE
             csr_mstatus_uie  <= csr_mstatus_upie;
             csr_mstatus_upie <= 1'b1;
           end
         endcase
       end
 
-      //push privilege stack
+      // push privilege stack
       if (ext_nmi) begin
-        //NMI always at Machine-mode
+        // NMI always at Machine-mode
         st_prv    <= `PRV_M;
         st_nxt_pc <= csr_mnmivec;
         st_flush  <= 1'b1;
 
-        //store current state
+        // store current state
         csr_mstatus_mpie <= csr_mstatus_mie;
         csr_mstatus_mie  <= 1'b0;
         csr_mstatus_mpp  <= st_prv;
@@ -717,7 +717,7 @@ module riscv_state #(
       else if (take_interrupt) begin
         st_flush  <= ~du_stall & ~du_flush;
 
-        //Check if interrupts are delegated
+        // Check if interrupts are delegated
         if (has_n && st_prv == `PRV_U && ( st_int & csr_mideleg & 12'h111) ) begin
           st_prv    <= `PRV_U;
           st_nxt_pc <= csr_utvec & ~'h3 + (csr_utvec[0] ? interrupt_cause << 2 : 0);
@@ -793,7 +793,7 @@ module riscv_state #(
     end
   end
 
-  //mcycle, minstret
+  // mcycle, minstret
   generate
     if (XLEN==32) begin
       always @(posedge clk,negedge rstn) begin
@@ -802,7 +802,7 @@ module riscv_state #(
           csr_minstret <= 'h0;
         end
         else begin
-          //cycle always counts (thread active time)
+          // cycle always counts (thread active time)
           if      ( (ex_csr_we && ex_csr_reg == `MCYCLE  && st_prv == `PRV_M) ||
                     (du_we_csr && du_addr    == `MCYCLE)  )
             csr_mcycle_l <= csr_wval;
@@ -812,7 +812,7 @@ module riscv_state #(
           else
             csr_mcycle <= csr_mcycle + 'h1;
 
-          //instruction retire counter
+          // instruction retire counter
           if      ( (ex_csr_we && ex_csr_reg == `MINSTRET  && st_prv == `PRV_M) ||
                     (du_we_csr && du_addr    == `MINSTRET)  )
             csr_minstret_l <= csr_wval;
@@ -831,14 +831,14 @@ module riscv_state #(
           csr_minstret <= 'h0;
         end
         else begin
-          //cycle always counts (thread active time)
+          // cycle always counts (thread active time)
           if ( (ex_csr_we && ex_csr_reg == `MCYCLE && st_prv == `PRV_M) ||
                (du_we_csr && du_addr    == `MCYCLE)  )
             csr_mcycle <= csr_wval[63:0];
           else
             csr_mcycle <= csr_mcycle + 'h1;
 
-          //instruction retire counter
+          // instruction retire counter
           if ( (ex_csr_we && ex_csr_reg == `MINSTRET && st_prv == `PRV_M) ||
                (du_we_csr && du_addr    == `MINSTRET)  )
             csr_minstret <= csr_wval[63:0];
@@ -848,7 +848,7 @@ module riscv_state #(
       end
   endgenerate
 
-  //mnmivec - RoaLogic Extension
+  // mnmivec - RoaLogic Extension
   always @(posedge clk,negedge rstn) begin
     if (!rstn)
       csr_mnmivec <= MNMIVEC_DEFAULT;
@@ -857,7 +857,7 @@ module riscv_state #(
       csr_mnmivec <= {csr_wval[XLEN-1:2],2'b00};
   end
 
-  //mtvec
+  // mtvec
   always @(posedge clk,negedge rstn) begin
     if (!rstn)
       csr_mtvec <= MTVEC_DEFAULT;
@@ -866,7 +866,7 @@ module riscv_state #(
       csr_mtvec <= csr_wval & ~'h2;
   end
 
-  //mcounteren
+  // mcounteren
   always @(posedge clk,negedge rstn) begin
     if (!rstn)
       csr_mcounteren <= 'h0;
@@ -877,14 +877,14 @@ module riscv_state #(
 
   assign st_mcounteren = csr_mcounteren;
 
-  //medeleg, mideleg
+  // medeleg, mideleg
   generate
     if (!HAS_HYPER && !HAS_SUPER && !HAS_USER) begin
       assign csr_medeleg = 0;
       assign csr_mideleg = 0;
     end
     else begin
-      //medeleg
+      // medeleg
       always @(posedge clk,negedge rstn) begin
         if (!rstn)
           csr_medeleg <= 'h0;
@@ -893,7 +893,7 @@ module riscv_state #(
           csr_medeleg <= csr_wval & {EXCEPTION_SIZE{1'b1}};
       end
 
-      //mideleg
+      // mideleg
       always @(posedge clk,negedge rstn) begin
         if (!rstn)
           csr_mideleg <= 'h0;
@@ -921,7 +921,7 @@ module riscv_state #(
     end
   endgenerate
 
-  //mip
+  // mip
   always @(posedge clk,negedge rstn) begin
     if (!rstn) begin
       csr_mip   <= 'h0;
@@ -929,23 +929,23 @@ module riscv_state #(
       soft_ueip <= 1'b0;
     end
     else begin
-      //external interrupts
+      // external interrupts
       csr_mip_meip <=          ext_int[`PRV_M]; 
       csr_mip_heip <= has_h &  ext_int[`PRV_H];
       csr_mip_seip <= has_s & (ext_int[`PRV_S] | soft_seip);
       csr_mip_ueip <= has_n & (ext_int[`PRV_U] | soft_ueip);
 
-      //may only be written by M-mode
+      // may only be written by M-mode
       if ( (ex_csr_we & ex_csr_reg == `MIP & st_prv == `PRV_M) ||
            (du_we_csr & du_addr    == `MIP)                  ) begin
         soft_seip <= csr_wval[`SEI] & has_s;
         soft_ueip <= csr_wval[`UEI] & has_n;
       end
 
-      //timer interrupts
+      // timer interrupts
       csr_mip_mtip <= ext_tint;
 
-      //may only be written by M-mode
+      // may only be written by M-mode
       if ( (ex_csr_we & ex_csr_reg == `MIP & st_prv == `PRV_M) ||
            (du_we_csr & du_addr    == `MIP)                  ) begin
         csr_mip_htip <= csr_wval[`HTI] & has_h;
@@ -953,9 +953,9 @@ module riscv_state #(
         csr_mip_utip <= csr_wval[`UTI] & has_n;
       end
 
-      //software interrupts
+      // software interrupts
       csr_mip_msip <= ext_sint;
-      //Machine Mode write
+      // Machine Mode write
       if ( (ex_csr_we && ex_csr_reg == `MIP && st_prv == `PRV_M) ||
            (du_we_csr && du_addr    == `MIP)                   ) begin
         csr_mip_hsip <= csr_wval[`HSI] & has_h;
@@ -964,7 +964,7 @@ module riscv_state #(
       end
 /*
         else if (has_h) begin
-          //Hypervisor Mode write
+          // Hypervisor Mode write
           if ( (ex_csr_we && ex_csr_reg == HIP && st_prv >= `PRV_H) ||
                (du_we_csr && du_addr    == HIP)                   ) begin
               csr_mip_hsip <= csr_wval[`HSI] & csr_mideleg[`HSI];
@@ -974,7 +974,7 @@ module riscv_state #(
         end
  */
       else if (has_s) begin
-        //Supervisor Mode write
+        // Supervisor Mode write
         if ( (ex_csr_we && ex_csr_reg == `SIP && st_prv >= `PRV_S) ||
              (du_we_csr && du_addr    == `SIP)                   ) begin
           csr_mip_ssip <= csr_wval[`SSI] & csr_mideleg[`SSI];
@@ -982,7 +982,7 @@ module riscv_state #(
         end
       end
       else if (has_n) begin
-        //User Mode write
+        // User Mode write
         if ( (ex_csr_we && ex_csr_reg == `UIP) ||
              (du_we_csr && du_addr    == `UIP)  ) begin
           csr_mip_usip <= csr_wval[`USI] & csr_mideleg[`USI];
@@ -991,7 +991,7 @@ module riscv_state #(
     end
   end
 
-  //mie
+  // mie
   always @(posedge clk,negedge rstn) begin
     if (!rstn)
       csr_mie <= 'h0;
@@ -1047,7 +1047,7 @@ module riscv_state #(
     end
   end
 
-  //mscratch
+  // mscratch
   always @(posedge clk,negedge rstn) begin
     if      (!rstn)
       csr_mscratch <= 'h0;
@@ -1058,8 +1058,8 @@ module riscv_state #(
 
   assign trap_cause = get_trap_cause( wb_exception & ~du_ie[15:0]);
 
-  //decode interrupts
-  //priority external, software, timer
+  // decode interrupts
+  // priority external, software, timer
   assign st_int[`CAUSE_MEINT] = ( ((st_prv < `PRV_M) | (st_prv == `PRV_M & csr_mstatus_mie)) & (csr_mip_meip & csr_mie_meie) );
   assign st_int[`CAUSE_HEINT] = ( ((st_prv < `PRV_H) | (st_prv == `PRV_H & csr_mstatus_hie)) & (csr_mip_heip & csr_mie_heie) );
   assign st_int[`CAUSE_SEINT] = ( ((st_prv < `PRV_S) | (st_prv == `PRV_S & csr_mstatus_sie)) & (csr_mip_seip & csr_mie_seie) );
@@ -1075,7 +1075,7 @@ module riscv_state #(
   assign st_int[`CAUSE_STINT] = ( ((st_prv < `PRV_S) | (st_prv == `PRV_S & csr_mstatus_sie)) & (csr_mip_stip & csr_mie_stie) ) & ~(st_int[`CAUSE_SEINT] | st_int[`CAUSE_SSINT]);
   assign st_int[`CAUSE_UTINT] = (                      (st_prv == `PRV_U & csr_mstatus_uie)  & (csr_mip_utip & csr_mie_utie) ) & ~(st_int[`CAUSE_UEINT] | st_int[`CAUSE_USINT]);
 
-  //interrupt cause priority
+  // interrupt cause priority
   always @(*) begin
     casex (st_int & ~du_ie[31:16])
       12'h??1 : interrupt_cause = 0;
@@ -1096,31 +1096,31 @@ module riscv_state #(
 
   assign take_interrupt = |(st_int & ~du_ie[31:16]);
 
-  //for Debug Unit
+  // for Debug Unit
   assign du_exceptions = { {16-$bits(st_int){1'b0}}, st_int, {16-$bits(wb_exception){1'b0}}, wb_exception} & du_ie;
 
-  //Update mepc and mcause
+  // Update mepc and mcause
   always @(posedge clk,negedge rstn) begin
     if (!rstn) begin
       st_interrupt <= 'b0;
 
       csr_mepc     <= 'h0;
-    //csr_hepc     <= 'h0;
+    // csr_hepc     <= 'h0;
       csr_sepc     <= 'h0;
       csr_uepc     <= 'h0;
 
       csr_mcause   <= 'h0;
-    //csr_hcause   <= 'h0;
+    // csr_hcause   <= 'h0;
       csr_scause   <= 'h0;
       csr_ucause   <= 'h0;
 
       csr_mtval    <= 'h0;
-    //csr_htval    <= 'h0;
+    // csr_htval    <= 'h0;
       csr_stval    <= 'h0;
       csr_utval    <= 'h0;
     end
     else begin
-      //Write access to regs (lowest priority)
+      // Write access to regs (lowest priority)
       if ( (ex_csr_we && ex_csr_reg == `MEPC && st_prv == `PRV_M) ||
            (du_we_csr && du_addr    == `MEPC)                  )
         csr_mepc <= {csr_wval[XLEN-1:2], csr_wval[1] & has_rvc, 1'b0};
@@ -1171,20 +1171,20 @@ module riscv_state #(
            (du_we_csr && du_addr    == `UTVAL)                  )
         csr_utval <= csr_wval;
 
-      //Handle exceptions
+      // Handle exceptions
       st_interrupt <= 1'b0;
 
-      //priority external interrupts, software interrupts, timer interrupts, traps
-      if (ext_nmi) begin //TODO: doesn't this cause a deadlock? Need to hold of NMI once handled
-        //NMI always at Machine Level
+      // priority external interrupts, software interrupts, timer interrupts, traps
+      if (ext_nmi) begin // TODO: doesn't this cause a deadlock? Need to hold of NMI once handled
+        // NMI always at Machine Level
         st_interrupt <= 1'b1;
         csr_mepc     <= bu_flush ? bu_nxt_pc : id_pc;
-        csr_mcause   <= (1 << (XLEN-1)) | 'h0; //Implementation dependent. '0' indicates 'unknown cause'
+        csr_mcause   <= (1 << (XLEN-1)) | 'h0; // Implementation dependent. '0' indicates 'unknown cause'
       end
       else if (take_interrupt) begin
         st_interrupt <= 1'b1;
 
-        //Check if interrupts are delegated
+        // Check if interrupts are delegated
         if (has_n && st_prv == `PRV_U && ( st_int & csr_mideleg & 12'h111) ) begin
           csr_ucause <= (1 << (XLEN-1)) | interrupt_cause;
           csr_uepc   <= id_pc;
@@ -1205,7 +1205,7 @@ module riscv_state #(
         end
       end
       else if (|(wb_exception & ~du_ie[15:0])) begin
-        //Trap
+        // Trap
         if (has_n && st_prv == `PRV_U && |(wb_exception & csr_medeleg)) begin
           csr_uepc   <= wb_pc;
           csr_ucause <= trap_cause;
@@ -1251,9 +1251,9 @@ module riscv_state #(
     end
   end
 
-  //Physical Memory Protection & Translation registers
+  // Physical Memory Protection & Translation registers
   generate
-    if (XLEN > 64) begin      //RV128
+    if (XLEN > 64) begin      // RV128
       for (idx=0; idx<16; idx=idx+1) begin: gen_pmpcfg0
         if (idx < PMP_CNT) begin
           always @(posedge clk,negedge rstn) begin
@@ -1265,11 +1265,11 @@ module riscv_state #(
         end
         else
           assign csr_pmpcfg[idx] = 'h0;
-      end //next idx
+      end // next idx
 
-      //pmpaddr not defined for RV128 yet
+      // pmpaddr not defined for RV128 yet
     end
-    else if (XLEN > 32) begin //RV64 
+    else if (XLEN > 32) begin // RV64 
       for (idx=0; idx<8; idx=idx+1) begin: gen_pmpcfg0
         always @(posedge clk,negedge rstn) begin
           if (!rstn) csr_pmpcfg[idx] <= 'h0;
@@ -1278,7 +1278,7 @@ module riscv_state #(
             if (idx < PMP_CNT && !csr_pmpcfg[idx][7])
               csr_pmpcfg[idx] <= csr_wval[0 + idx*8 +: 8] & `PMPCFG_MASK;
         end
-      end //next idx
+      end // next idx
 
       for (idx=8; idx<16; idx=idx+1) begin: gen_pmpcfg2
         always @(posedge clk,negedge rstn) begin
@@ -1288,7 +1288,7 @@ module riscv_state #(
             if (idx < PMP_CNT && !csr_pmpcfg[idx][7])
               csr_pmpcfg[idx] <= csr_wval[(idx-8)*8 +:8] & `PMPCFG_MASK;
         end
-      end //next idx
+      end // next idx
 
       for (idx=0; idx < 16; idx=idx+1) begin: gen_pmpaddr
         if (idx < PMP_CNT) begin
@@ -1314,9 +1314,9 @@ module riscv_state #(
         else begin
           assign csr_pmpaddr[idx] = 'h0;
         end
-      end //next idx
+      end // next idx
     end
-    else begin //RV32
+    else begin // RV32
       for (idx=0; idx<4; idx=idx+1) begin: gen_pmpcfg0
         always @(posedge clk,negedge rstn) begin
           if (!rstn) csr_pmpcfg[idx] <= 'h0;
@@ -1325,7 +1325,7 @@ module riscv_state #(
             if (idx < PMP_CNT && !csr_pmpcfg[idx][7])
               csr_pmpcfg[idx] <= csr_wval[idx*8 +:8] & `PMPCFG_MASK;
         end
-      end //next idx
+      end // next idx
 
       for (idx=4; idx<8; idx=idx+1) begin: gen_pmpcfg1
         always @(posedge clk,negedge rstn) begin
@@ -1335,7 +1335,7 @@ module riscv_state #(
             if (idx < PMP_CNT && !csr_pmpcfg[idx][7])
               csr_pmpcfg[idx] <= csr_wval[(idx-4)*8 +:8] & `PMPCFG_MASK;
         end
-      end //next idx
+      end // next idx
 
       for (idx=8; idx<12; idx=idx+1) begin: gen_pmpcfg2
         always @(posedge clk,negedge rstn) begin
@@ -1345,7 +1345,7 @@ module riscv_state #(
             if (idx < PMP_CNT && !csr_pmpcfg[idx][7])
               csr_pmpcfg[idx] <= csr_wval[(idx-8)*8 +:8] & `PMPCFG_MASK;
         end
-      end //next idx
+      end // next idx
 
       for (idx=12; idx<16; idx=idx+1) begin: gen_pmpcfg3
         always @(posedge clk,negedge rstn) begin
@@ -1355,7 +1355,7 @@ module riscv_state #(
             if (idx < PMP_CNT && !csr_pmpcfg[idx][7])
               csr_pmpcfg[idx] <= csr_wval[(idx-12)*8 +:8] & `PMPCFG_MASK;
         end
-      end //next idx
+      end // next idx
 
       for (idx=0; idx < 16; idx=idx+1) begin: gen_pmpaddr
         if (idx < PMP_CNT) begin
@@ -1381,7 +1381,7 @@ module riscv_state #(
         else begin
           assign csr_pmpaddr[idx] = 'h0;
         end
-      end //next idx
+      end // next idx
     end
   endgenerate
 
@@ -1394,7 +1394,7 @@ module riscv_state #(
   //
   generate
     if (HAS_SUPER) begin
-      //stvec
+      // stvec
       always @(posedge clk,negedge rstn) begin
         if      (!rstn)
           csr_stvec <= STVEC_DEFAULT;
@@ -1403,7 +1403,7 @@ module riscv_state #(
           csr_stvec <= csr_wval & ~'h2;
       end
 
-      //scounteren
+      // scounteren
       always @(posedge clk,negedge rstn) begin
         if (!rstn)
           csr_scounteren <= 'h0;
@@ -1412,7 +1412,7 @@ module riscv_state #(
           csr_scounteren <= csr_wval & 'h7;
       end
 
-      //sedeleg
+      // sedeleg
       always @(posedge clk,negedge rstn) begin
         if      (!rstn)
           csr_sedeleg <= 'h0;
@@ -1421,7 +1421,7 @@ module riscv_state #(
           csr_sedeleg <= csr_wval & ((1<<`CAUSE_UMODE_ECALL) | (1<<`CAUSE_SMODE_ECALL));
       end
 
-      //sscratch
+      // sscratch
       always @(posedge clk,negedge rstn) begin
         if      (!rstn)
           csr_sscratch <= 'h0;
@@ -1430,7 +1430,7 @@ module riscv_state #(
           csr_sscratch <= csr_wval;
       end
 
-      //satp
+      // satp
       always @(posedge clk,negedge rstn) begin
         if      (!rstn)
           csr_satp <= 'h0;
@@ -1439,7 +1439,7 @@ module riscv_state #(
           csr_satp <= ex_csr_wval;
       end
     end
-    else begin //NO SUPERVISOR MODE
+    else begin // NO SUPERVISOR MODE
       assign csr_stvec      = 'h0;
       assign csr_scounteren = 'h0;
       assign csr_sedeleg    = 'h0;
@@ -1451,11 +1451,11 @@ module riscv_state #(
   assign st_scounteren = csr_scounteren;
 
   ////////////////////////////////////////////////////////////////
-  //User Registers
+  // User Registers
   //
   generate
     if (HAS_USER) begin
-      //utvec
+      // utvec
       always @(posedge clk,negedge rstn) begin
         if      (!rstn)
           csr_utvec <= UTVEC_DEFAULT;
@@ -1464,7 +1464,7 @@ module riscv_state #(
           csr_utvec <= {csr_wval[XLEN-1:2],2'b00};
       end
 
-      //uscratch
+      // uscratch
       always @(posedge clk,negedge rstn) begin
         if      (!rstn)
           csr_uscratch <= 'h0;
@@ -1473,12 +1473,12 @@ module riscv_state #(
           csr_uscratch <= csr_wval;
       end
 
-      //Floating point registers
+      // Floating point registers
       if (HAS_FPU) begin
-        //TODO
+        // TODO
       end
     end
-    else begin //NO USER MODE
+    else begin // NO USER MODE
       assign csr_utvec    = 'h0;
       assign csr_uscratch = 'h0;
 

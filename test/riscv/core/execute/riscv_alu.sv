@@ -53,27 +53,27 @@ module riscv_alu #(
 
     input                  ex_stall,
 
-    //Program counter
+    // Program counter
     input      [XLEN-1:0] id_pc,
 
-    //Instruction
+    // Instruction
     input                 id_bubble,
     input      [ILEN-1:0] id_instr,
 
-    //Operands
+    // Operands
     input      [XLEN-1:0] opA,
     input      [XLEN-1:0] opB,
 
-    //to WB
+    // to WB
     output reg            alu_bubble,
     output reg [XLEN-1:0] alu_r,
 
-    //To State
+    // To State
     output     [    11:0] ex_csr_reg,
     output reg [XLEN-1:0] ex_csr_wval,
     output reg            ex_csr_we,
 
-    //From State
+    // From State
     input      [XLEN-1:0] st_csr_rval,
     input      [     1:0] st_xlen
   );
@@ -108,7 +108,7 @@ module riscv_alu #(
   logic                    xlen32;
   logic                    has_rvc;
 
-  //Operand generation
+  // Operand generation
   logic [            31:0] opA32;
   logic [            31:0] opB32;
   logic [SBITS       -1:0] shamt;
@@ -120,7 +120,7 @@ module riscv_alu #(
   // Module Body
   //
 
-  //Instruction
+  // Instruction
   assign func7  = id_instr[31:25];
   assign func3  = id_instr[14:12];
   assign opcode = id_instr[ 6: 2];
@@ -133,23 +133,23 @@ module riscv_alu #(
   assign shamt   = opB[SBITS-1:0];
   assign shamt32 = opB[      4:0];
 
-  //ALU operations
+  // ALU operations
   always @(posedge clk, negedge rstn) begin
     if      (!rstn    )
       alu_r <= 'h0;
     else if (!ex_stall) begin
       casex ( {xlen32,func7,func3,opcode} )
-        {1'b?,`LUI   }: alu_r <= opA + opB; //actually just opB, but simplify encoding
+        {1'b?,`LUI   }: alu_r <= opA + opB; // actually just opB, but simplify encoding
         {1'b?,`AUIPC }: alu_r <= opA + opB;
         {1'b?,`JAL   }: alu_r <= id_pc + 'h4;
         {1'b?,`JALR  }: alu_r <= id_pc + 'h4;
-        //logical operators
+        // logical operators
         {1'b?,`ADDI  }: alu_r <= opA + opB;
         {1'b?,`ADD   }: alu_r <= opA + opB;
-        {1'b0,`ADDIW }: alu_r <= sext32(opA32 + opB32);    //RV64
-        {1'b0,`ADDW  }: alu_r <= sext32(opA32 + opB32);    //RV64
+        {1'b0,`ADDIW }: alu_r <= sext32(opA32 + opB32);    // RV64
+        {1'b0,`ADDW  }: alu_r <= sext32(opA32 + opB32);    // RV64
         {1'b?,`SUB   }: alu_r <= opA - opB;
-        {1'b0,`SUBW  }: alu_r <= sext32(opA32 - opB32);    //RV64
+        {1'b0,`SUBW  }: alu_r <= sext32(opA32 - opB32);    // RV64
         {1'b?,`XORI  }: alu_r <= opA ^ opB;
         {1'b?,`XORX  }: alu_r <= opA ^ opB;
         {1'b?,`ORI   }: alu_r <= opA | opB;
@@ -158,21 +158,21 @@ module riscv_alu #(
         {1'b?,`ANDX  }: alu_r <= opA & opB;
         {1'b?,`SLLI  }: alu_r <= opA << shamt;
         {1'b?,`SLLX  }: alu_r <= opA << shamt;
-        {1'b0,`SLLIW }: alu_r <= sext32(opA32 << shamt32); //RV64
-        {1'b0,`SLLW  }: alu_r <= sext32(opA32 << shamt32); //RV64
+        {1'b0,`SLLIW }: alu_r <= sext32(opA32 << shamt32); // RV64
+        {1'b0,`SLLW  }: alu_r <= sext32(opA32 << shamt32); // RV64
         {1'b?,`SLTI  }: alu_r <= {~opA[XLEN-1],opA[XLEN-2:0]} < {~opB[XLEN-1],opB[XLEN-2:0]} ? 'h1 : 'h0;
         {1'b?,`SLT   }: alu_r <= {~opA[XLEN-1],opA[XLEN-2:0]} < {~opB[XLEN-1],opB[XLEN-2:0]} ? 'h1 : 'h0;
         {1'b?,`SLTIU }: alu_r <= opA < opB ? 'h1 : 'h0;
         {1'b?,`SLTU  }: alu_r <= opA < opB ? 'h1 : 'h0;
         {1'b?,`SRLI  }: alu_r <= opA >> shamt;
         {1'b?,`SRLX  }: alu_r <= opA >> shamt;
-        {1'b0,`SRLIW }: alu_r <= sext32(opA32 >> shamt32); //RV64
-        {1'b0,`SRLW  }: alu_r <= sext32(opA32 >> shamt32); //RV64
+        {1'b0,`SRLIW }: alu_r <= sext32(opA32 >> shamt32); // RV64
+        {1'b0,`SRLW  }: alu_r <= sext32(opA32 >> shamt32); // RV64
         {1'b?,`SRAI  }: alu_r <= $signed(opA) >>> shamt;
         {1'b?,`SRAX  }: alu_r <= $signed(opA) >>> shamt;
         {1'b0,`SRAIW }: alu_r <= sext32($signed(opA32) >>> shamt32);
         {1'b?,`SRAW  }: alu_r <= sext32($signed(opA32) >>> shamt32);
-        //CSR access
+        // CSR access
         {1'b?,`CSRRW }: alu_r <= {XLEN{1'b0}} | st_csr_rval;
         {1'b?,`CSRRWI}: alu_r <= {XLEN{1'b0}} | st_csr_rval;
         {1'b?,`CSRRS }: alu_r <= {XLEN{1'b0}} | st_csr_rval;
@@ -192,7 +192,7 @@ module riscv_alu #(
         {1'b?,`AUIPC }: alu_bubble <= id_bubble;
         {1'b?,`JAL   }: alu_bubble <= id_bubble;
         {1'b?,`JALR  }: alu_bubble <= id_bubble;
-        //logical operators
+        // logical operators
         {1'b?,`ADDI  }: alu_bubble <= id_bubble;
         {1'b?,`ADD   }: alu_bubble <= id_bubble;
         {1'b0,`ADDIW }: alu_bubble <= id_bubble;
@@ -221,7 +221,7 @@ module riscv_alu #(
         {1'b?,`SRAX  }: alu_bubble <= id_bubble;
         {1'b0,`SRAIW }: alu_bubble <= id_bubble;
         {1'b?,`SRAW  }: alu_bubble <= id_bubble;
-        //CSR access
+        // CSR access
         {1'b?,`CSRRW }: alu_bubble <= id_bubble;
         {1'b?,`CSRRWI}: alu_bubble <= id_bubble;
         {1'b?,`CSRRS }: alu_bubble <= id_bubble;
@@ -233,7 +233,7 @@ module riscv_alu #(
     end
   end
 
-  //CSR
+  // CSR
   assign ex_csr_reg = id_instr[31:20];
   assign csri = {{XLEN-5{1'b0}},opB[4:0]};
 

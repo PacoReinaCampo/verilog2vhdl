@@ -62,7 +62,7 @@ module riscv_ram_1rw #(
   //
   generate
     if (TECHNOLOGY == "N3X" || TECHNOLOGY == "n3x" ) begin
-      //eASIC N3X
+      // eASIC N3X
       riscv_ram_1rw_easic_n3x #(
         .ABITS ( ABITS ),
         .DBITS ( DBITS )
@@ -80,9 +80,9 @@ module riscv_ram_1rw #(
     end
     else begin // (TECHNOLOGY == "GENERIC")
 
-      //GENERIC -- inferrable memory
+      // GENERIC -- inferrable memory
 
-      //initial $display ("INFO   : No memory technology specified. Using generic inferred memory (%m)");
+      // initial $display ("INFO   : No memory technology specified. Using generic inferred memory (%m)");
 
       riscv_ram_1rw_generic #(
         .ABITS ( ABITS ),

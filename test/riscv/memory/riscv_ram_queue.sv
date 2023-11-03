@@ -47,25 +47,25 @@ module riscv_ram_queue #(
   parameter ALMOST_EMPTY_THRESHOLD = 0
 )
   (
-    input  wire              rst_ni,         //asynchronous, active low reset
-    input  wire              clk_i,          //rising edge triggered clock
+    input  wire              rst_ni,         // asynchronous, active low reset
+    input  wire              clk_i,          // rising edge triggered clock
 
-    input  wire              clr_i,          //clear all queue entries (synchronous reset)
-    input  wire              ena_i,          //clock enable
+    input  wire              clr_i,          // clear all queue entries (synchronous reset)
+    input  wire              ena_i,          // clock enable
 
-    //Queue Write
-    input  wire              we_i,           //Queue write enable
-    input  wire  [DBITS-1:0] d_i,            //Queue write data
+    // Queue Write
+    input  wire              we_i,           // Queue write enable
+    input  wire  [DBITS-1:0] d_i,            // Queue write data
 
-    //Queue Read
-    input  wire              re_i,           //Queue read enable
-    output reg   [DBITS-1:0] q_o,            //Queue read data
+    // Queue Read
+    input  wire              re_i,           // Queue read enable
+    output reg   [DBITS-1:0] q_o,            // Queue read data
 
-    //Status signals
-    output reg               empty_o,        //Queue is empty
-    output reg               full_o,         //Queue is full
-    output reg               almost_empty_o, //Programmable almost empty
-    output reg               almost_full_o   //Programmable almost full
+    // Status signals
+    output reg               empty_o,        // Queue is empty
+    output reg               full_o,         // Queue is full
+    output reg               almost_empty_o, // Programmable almost empty
+    output reg               almost_full_o   // Programmable almost full
   );
 
   //////////////////////////////////////////////////////////////////
@@ -92,7 +92,7 @@ module riscv_ram_queue #(
   // Module Body
   //
 
-  //Write Address
+  // Write Address
   always @(posedge clk_i,negedge rst_ni) begin
     if      (!rst_ni) queue_wadr <= 'h0;
     else if ( clr_i ) queue_wadr <= 'h0;
@@ -106,7 +106,7 @@ module riscv_ram_queue #(
 
   assign queue_xadr = ~|queue_wadr ? DEPTH-1 : queue_wadr-1;
 
-  //Queue Data
+  // Queue Data
   generate
     for (n=0; n<DEPTH-1; n=n+1) begin
       always @(posedge clk_i,negedge rst_ni) begin
@@ -138,7 +138,7 @@ module riscv_ram_queue #(
     end
   endgenerate
 
-  //Queue Almost Empty
+  // Queue Almost Empty
   always @(posedge clk_i, negedge rst_ni) begin
     if      (!rst_ni) almost_empty_o <= 1'b1;
     else if ( clr_i ) almost_empty_o <= 1'b1;
@@ -150,7 +150,7 @@ module riscv_ram_queue #(
       endcase
   end
 
-  //Queue Empty
+  // Queue Empty
   always @(posedge clk_i, negedge rst_ni) begin
     if      (!rst_ni) empty_o <= 1'b1;
     else if ( clr_i ) empty_o <= 1'b1;
@@ -162,7 +162,7 @@ module riscv_ram_queue #(
       endcase
   end
 
-  //Queue Almost Full
+  // Queue Almost Full
   always @(posedge clk_i, negedge rst_ni) begin
     if      (!rst_ni) almost_full_o <= 1'b0;
     else if ( clr_i ) almost_full_o <= 1'b0;
@@ -174,7 +174,7 @@ module riscv_ram_queue #(
       endcase
   end
 
-  //Queue Full
+  // Queue Full
   always @(posedge clk_i, negedge rst_ni) begin
     if      (!rst_ni) full_o <= 1'b0;
     else if ( clr_i ) full_o <= 1'b0;
@@ -186,7 +186,7 @@ module riscv_ram_queue #(
       endcase
   end
 
-  //Queue output data
+  // Queue output data
   assign q_o = queue_data[0];
 
   `ifdef rl_ram_queue_WARNINGS

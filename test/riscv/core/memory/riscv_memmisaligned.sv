@@ -49,13 +49,13 @@ module riscv_memmisaligned #(
   (
     input  wire               clk_i,
 
-    //CPU side
+    // CPU side
     input  wire               instruction_i,
     input  wire               req_i,
     input  wire  [XLEN  -1:0] adr_i,
     input  wire  [       2:0] size_i,
 
-    //To memory subsystem
+    // To memory subsystem
     output reg                misaligned_o
   );
 

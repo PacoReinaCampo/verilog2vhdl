@@ -61,7 +61,7 @@ module riscv_execution #(
     input                           wb_stall,
     output                          ex_stall,
 
-    //Program counter
+    // Program counter
     input      [XLEN          -1:0] id_pc,
     output reg [XLEN          -1:0] ex_pc,
     output reg [XLEN          -1:0] bu_nxt_pc,
@@ -73,7 +73,7 @@ module riscv_execution #(
     output                          bu_bp_btaken,
     output                          bu_bp_update,
 
-    //Instruction
+    // Instruction
     input                           id_bubble,
     input      [ILEN          -1:0] id_instr,
     output                          ex_bubble,
@@ -84,7 +84,7 @@ module riscv_execution #(
     input      [EXCEPTION_SIZE-1:0] wb_exception,
     output reg [EXCEPTION_SIZE-1:0] ex_exception,
 
-    //from ID
+    // from ID
     input                           id_userf_opA,
     input                           id_userf_opB,
     input                           id_bypex_opA,
@@ -96,29 +96,29 @@ module riscv_execution #(
     input      [XLEN          -1:0] id_opA,
     input      [XLEN          -1:0] id_opB,
 
-    //from RF
+    // from RF
     input      [XLEN          -1:0] rf_srcv1,
     input      [XLEN          -1:0] rf_srcv2,
 
-    //to MEM
+    // to MEM
     output reg [XLEN          -1:0] ex_r,
 
-    //Bypasses
+    // Bypasses
     input      [XLEN          -1:0] mem_r,
     input      [XLEN          -1:0] wb_r,
 
-    //To State
+    // To State
     output     [              11:0] ex_csr_reg,
     output     [XLEN          -1:0] ex_csr_wval,
     output                          ex_csr_we,
 
-    //From State
+    // From State
     input      [               1:0] st_prv,
     input      [               1:0] st_xlen,
     input                           st_flush,
     input      [XLEN          -1:0] st_csr_rval,
 
-    //To DCACHE/Memory
+    // To DCACHE/Memory
     output     [XLEN          -1:0] dmem_adr,
     output     [XLEN          -1:0] dmem_d,
     output                          dmem_req,
@@ -129,7 +129,7 @@ module riscv_execution #(
     input                           dmem_misaligned,
     input                           dmem_page_fault,
 
-    //Debug Unit
+    // Debug Unit
     input                           du_stall,
     input                           du_stall_dly,
     input                           du_flush,
@@ -143,7 +143,7 @@ module riscv_execution #(
   // Variables
   //
 
-  //Operand generation
+  // Operand generation
   logic [XLEN          -1:0] opA;
   logic [XLEN          -1:0] opB;
 
@@ -152,18 +152,18 @@ module riscv_execution #(
   logic [XLEN          -1:0] mul_r;
   logic [XLEN          -1:0] div_r;
 
-  //Pipeline Bubbles
+  // Pipeline Bubbles
   logic                      alu_bubble;
   logic                      lsu_bubble;
   logic                      mul_bubble;
   logic                      div_bubble;
 
-  //Pipeline stalls
+  // Pipeline stalls
   logic                      lsu_stall;
   logic                      mul_stall;
   logic                      div_stall;
 
-  //Exceptions
+  // Exceptions
   logic [EXCEPTION_SIZE-1:0] bu_exception;
   logic [EXCEPTION_SIZE-1:0] lsu_exception;
 
@@ -172,22 +172,22 @@ module riscv_execution #(
   // Module Body
   //
 
-  //Program Counter
+  // Program Counter
   always @(posedge clk, negedge rstn) begin
     if      (!rstn                 ) ex_pc <= PC_INIT;
-    else if (!ex_stall && !du_stall) ex_pc <= id_pc;  //stall during DBG to retain PPC
+    else if (!ex_stall && !du_stall) ex_pc <= id_pc;  // stall during DBG to retain PPC
   end
 
-  //Instruction
+  // Instruction
   always @(posedge clk) begin
     if (!ex_stall) ex_instr <= id_instr;
   end
 
-  //Bypasses
+  // Bypasses
 
-  //Ignore the bypasses during dbg_stall, use register-file instead
-  //use du_stall_dly, because this is combinatorial
-  //When the pipeline is longer than the time for the debugger to access the system, this fails
+  // Ignore the bypasses during dbg_stall, use register-file instead
+  // use du_stall_dly, because this is combinatorial
+  // When the pipeline is longer than the time for the debugger to access the system, this fails
   always @(*) begin
     casex ( {id_userf_opA, id_bypwb_opA, id_bypmem_opA, id_bypex_opA} )
       4'b???1: opA = du_stall_dly ? rf_srcv1 : ex_r;
@@ -208,7 +208,7 @@ module riscv_execution #(
     endcase
   end
 
-  //Execution Units
+  // Execution Units
   riscv_alu #(
     .XLEN    ( XLEN    ),
     .ILEN    ( ILEN    ),
@@ -354,11 +354,11 @@ module riscv_execution #(
     end
   endgenerate
 
-  //Combine outputs into 1 single EX output
+  // Combine outputs into 1 single EX output
   assign ex_bubble = alu_bubble & lsu_bubble & mul_bubble & div_bubble;
   assign ex_stall  = wb_stall | lsu_stall | mul_stall | div_stall;
 
-  //result
+  // result
   always @(*) begin
     casex ( {mul_bubble,div_bubble,lsu_bubble} )
       3'b110 : ex_r = lsu_r;

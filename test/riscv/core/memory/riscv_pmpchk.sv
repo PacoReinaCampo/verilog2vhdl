@@ -48,20 +48,20 @@ module riscv_pmpchk #(
   parameter PMP_CNT = 16
 )
   (
-    //From State
+    // From State
     input [PMP_CNT-1:0][     7:0] st_pmpcfg_i,
     input [PMP_CNT-1:0][XLEN-1:0] st_pmpaddr_i,
 
     input              [     1:0] st_prv_i,
 
-    //Memory Access
-    input                         instruction_i,   //This is an instruction access
-    input                         req_i,           //Memory access requested
-    input              [PLEN-1:0] adr_i,           //Physical Memory address (i.e. after translation)
-    input wire         [     2:0] size_i,          //Transfer size
-    input                         we_i,            //Read/Write enable
+    // Memory Access
+    input                         instruction_i,   // This is an instruction access
+    input                         req_i,           // Memory access requested
+    input              [PLEN-1:0] adr_i,           // Physical Memory address (i.e. after translation)
+    input wire         [     2:0] size_i,          // Transfer size
+    input                         we_i,            // Read/Write enable
 
-    //Output
+    // Output
     output                        exception_o
 );
 
@@ -70,7 +70,7 @@ module riscv_pmpchk #(
   // Functions
   //
 
-  //convert transfer size in number of bytes in transfer
+  // convert transfer size in number of bytes in transfer
   function automatic integer size2bytes;
     input [2:0] size;
 
@@ -87,16 +87,16 @@ module riscv_pmpchk #(
     endcase
   endfunction
 
-  //Lower and Upper bounds for NA4/NAPOT
+  // Lower and Upper bounds for NA4/NAPOT
   function automatic [PLEN-1:2] napot_lb;
-    input            na4; //special case na4
+    input            na4; // special case na4
     input [PLEN-1:2] pmaddr;
 
     integer n, i;
     bit true;
     logic [PLEN-1:2] mask;
 
-    //find 'n' boundary = 2^(n+2) bytes
+    // find 'n' boundary = 2^(n+2) bytes
     n = 0;
     if (!na4) begin
       true = 1'b1;
@@ -109,15 +109,15 @@ module riscv_pmpchk #(
       n=n+1;
     end
 
-    //create mask
+    // create mask
     mask = {$bits(mask){1'b1}} << n;
 
-    //lower bound address
+    // lower bound address
     napot_lb = pmaddr & mask;
   endfunction
 
   function automatic [PLEN-1:2] napot_ub;
-    input            na4; //special case na4
+    input            na4; // special case na4
     input [PLEN-1:2] pmaddr;
 
     integer n, i;
@@ -125,7 +125,7 @@ module riscv_pmpchk #(
     logic [PLEN-1:2] mask;
     logic [PLEN-1:2] incr;
 
-    //find 'n' boundary = 2^(n+2) bytes
+    // find 'n' boundary = 2^(n+2) bytes
     n = 0;
     if (!na4) begin
       true = 1'b1;
@@ -138,15 +138,15 @@ module riscv_pmpchk #(
       n=n+1;
     end
 
-    //create mask and increment
+    // create mask and increment
     mask = {$bits(mask){1'b1}} << n;
     incr = 1'h1 << n;
 
-    //upper bound address
+    // upper bound address
     napot_ub = (pmaddr + incr) & mask;
   endfunction
 
-  //Is ANY byte of 'access' in pma range?
+  // Is ANY byte of 'access' in pma range?
   function automatic match_any;
     input [PLEN-1:2] access_lb;
     input [PLEN-1:2] access_ub;
@@ -163,7 +163,7 @@ module riscv_pmpchk #(
     match_any = (access_lb >= pma_ub) || (access_ub <  pma_lb) ? 1'b0 : 1'b1;
   endfunction
 
-  //Are ALL bytes of 'access' in PMA range?
+  // Are ALL bytes of 'access' in PMA range?
   function automatic match_all;
     input [PLEN-1:2] access_lb;
     input [PLEN-1:2] access_ub;
@@ -173,13 +173,13 @@ module riscv_pmpchk #(
     match_all = (access_lb >= pma_lb) && (access_ub < pma_ub) ? 1'b1 : 1'b0;
   endfunction
 
-  //get highest priority (==lowest number) PMP that matches
+  // get highest priority (==lowest number) PMP that matches
   function automatic integer highest_priority_match;
     input [PMP_CNT-1:0] m;
 
     integer n;
 
-    highest_priority_match = 0; //default value
+    highest_priority_match = 0; // default value
 
     for (n=PMP_CNT-1; n >= 0; n=n-1) begin
       if (m[n]) highest_priority_match = n;
@@ -217,7 +217,7 @@ module riscv_pmpchk #(
 
   generate
     for (i=0; i < PMP_CNT; i=i+1) begin: gen_pmp_bounds
-      //lower bounds
+      // lower bounds
       always @(*) begin
         case (st_pmpcfg_i[i][4:3])
           `TOR    : pmp_lb[i] = (i==0) ? 0 : st_pmpcfg_i[i][4:3] != `TOR ? pmp_ub[i] : st_pmpaddr_i[i][PLEN-3:0];
@@ -227,7 +227,7 @@ module riscv_pmpchk #(
         endcase
       end
 
-      //upper bounds
+      // upper bounds
       always @(*) begin
         case (st_pmpcfg_i[i][4:3])
           `TOR    : pmp_ub[i] = st_pmpaddr_i[i][PLEN-3:0];
@@ -237,7 +237,7 @@ module riscv_pmpchk #(
         endcase
       end
 
-      //match-any
+      // match-any
       assign pmp_match    [i] = match_any( access_lb[PLEN-1:2],
                                            access_ub[PLEN-1:2],
                                            pmp_lb[i],
@@ -259,10 +259,10 @@ module riscv_pmpchk #(
    * 3. privilegel level is S or U AND no PMPs matched AND PMPs are implemented
    */
 
-  assign exception_o = req_i & (~|pmp_match ? (st_prv_i != `PRV_M) & (PMP_CNT > 0)  //Prv.Lvl != M-Mode, no PMP matched, but PMPs implemented -> FAIL
+  assign exception_o = req_i & (~|pmp_match ? (st_prv_i != `PRV_M) & (PMP_CNT > 0)  // Prv.Lvl != M-Mode, no PMP matched, but PMPs implemented -> FAIL
                                 : ~pmp_match_all[ matched_pmp ]     |
                                 (
-                                  ((st_prv_i != `PRV_M) | matched_pmpcfg[7] ) &  //pmpcfg.l set or privilege level != M-mode
+                                  ((st_prv_i != `PRV_M) | matched_pmpcfg[7] ) &  // pmpcfg.l set or privilege level != M-mode
                                   ((~matched_pmpcfg[0] & ~we_i           ) |     // read-access while not allowed          -> FAIL
                                    (~matched_pmpcfg[1] &  we_i           ) |     // write-access while not allowed         -> FAIL
                                    (~matched_pmpcfg[2] &  instruction_i  ) )     // instruction read, but not instruction  -> FAIL

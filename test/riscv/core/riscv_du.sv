@@ -58,7 +58,7 @@ module riscv_du #(
   input                           rstn,
   input                           clk,
 
-  //Debug Port interface
+  // Debug Port interface
   input                           dbg_stall,
   input                           dbg_strb,
   input                           dbg_we,
@@ -69,7 +69,7 @@ module riscv_du #(
   output reg                      dbg_bp,
 
 
-  //CPU signals
+  // CPU signals
   output                          du_stall,
   output reg                      du_stall_dly,
   output                          du_flush,
@@ -100,9 +100,9 @@ module riscv_du #(
   input                           ex_stall,
 //                                mem_req,
 //                                mem_we,
-//input      [XLEN          -1:0] mem_adr,
+// input      [XLEN          -1:0] mem_adr,
 
-  //From state
+  // From state
   input      [              31:0] du_exceptions
 );
 
@@ -149,7 +149,7 @@ module riscv_du #(
   // Module Body
   //
 
-  //Debugger Interface
+  // Debugger Interface
 
   // Decode incoming address
   assign du_bank_addr    = dbg_addr[PLEN-1:DU_ADDR_SIZE];
@@ -157,12 +157,12 @@ module riscv_du #(
   assign du_sel_gprs     = du_bank_addr == `DBG_GPRS;
   assign du_sel_csrs     = du_bank_addr == `DBG_CSRS;
 
-  //generate 1 cycle pulse strobe
+  // generate 1 cycle pulse strobe
   always @(posedge clk) begin
     dbg_strb_dly <= dbg_strb;
   end
 
-  //generate (write) access signals
+  // generate (write) access signals
   assign du_access = (dbg_strb & dbg_stall) | (dbg_strb & du_sel_internal);
   assign du_we     = du_access & ~dbg_strb_dly & dbg_we;
 
@@ -174,13 +174,13 @@ module riscv_du #(
 
   assign dbg_ack = du_ack[0];
 
-  //actual BreakPoint signal
+  // actual BreakPoint signal
   always @(posedge clk,negedge rstn) begin
     if (!rstn) dbg_bp <= 'b0;
     else       dbg_bp <= ~ex_stall & ~du_stall & ~du_flush & ~bu_flush & ~st_flush & (|du_exceptions | |{dbg_bp_hit, dbg_branch_break_hit, dbg_instr_break_hit});
   end
 
-  //CPU Interface
+  // CPU Interface
 
   // assign CPU signals
   assign du_stall = dbg_stall;
@@ -251,9 +251,9 @@ module riscv_du #(
     endcase
   end
 
-  //Registers
+  // Registers
 
-  //DBG CTRL
+  // DBG CTRL
   always @(posedge clk,negedge rstn) begin
     if (!rstn) begin
       dbg_instr_break_ena  <= 1'b0;
@@ -265,7 +265,7 @@ module riscv_du #(
     end
   end
 
-  //DBG HIT
+  // DBG HIT
   always @(posedge clk,negedge rstn) begin
     if (!rstn) begin
       dbg_instr_break_hit  <= 1'b0;
@@ -290,25 +290,25 @@ module riscv_du #(
           else if ( bp_hit[n]                            ) dbg_bp_hit[n] <= 1'b1;
         end
       end
-      //else //n >= BREAKPOINTS
-        //assign dbg_bp_hit[n] = 1'b0;
+      // else // n >= BREAKPOINTS
+        // assign dbg_bp_hit[n] = 1'b0;
     end
   endgenerate
 
-  //DBG IE
+  // DBG IE
   always @(posedge clk,negedge rstn) begin
     if      (!rstn                                ) dbg_ie <= 'h0;
     else if ( du_we_internal && du_addr == `DBG_IE) dbg_ie <= du_dato[31:0];
   end
 
-  //send to Thread-State
+  // send to Thread-State
   assign du_ie = dbg_ie;
 
-  //DBG CAUSE
+  // DBG CAUSE
   always @(posedge clk,negedge rstn) begin
     if (!rstn)                                         dbg_cause <= 'h0;
     else if ( du_we_internal && du_addr == `DBG_CAUSE) dbg_cause <= du_dato;
-    else if (|du_exceptions[15:0]) begin //traps
+    else if (|du_exceptions[15:0]) begin // traps
       casex (du_exceptions[15:0])
         16'h???1 : dbg_cause <=  0;
         16'h???2 : dbg_cause <=  1;
@@ -329,7 +329,7 @@ module riscv_du #(
         default  : dbg_cause <=  0;
       endcase
     end
-    else if (|du_exceptions[31:16]) begin //Interrupts
+    else if (|du_exceptions[31:16]) begin // Interrupts
       casex ( du_exceptions[31:16])
         16'h???1 : dbg_cause <= ('h1 << (XLEN-1)) |  0;
         16'h???2 : dbg_cause <= ('h1 << (XLEN-1)) |  1;
@@ -352,7 +352,7 @@ module riscv_du #(
     end
   end
 
-  //DBG BPCTRL / DBG BPDATA
+  // DBG BPCTRL / DBG BPDATA
   generate
     for (n=0; n<MAX_BREAKPOINTS; n=n+1) begin: gen_bp
       if (n < BREAKPOINTS) begin
@@ -374,10 +374,10 @@ module riscv_du #(
         end
       end
       else begin
-        //assign dbg_cc          [n] = 'h0;
-        //assign dbg_enabled     [n] = 'h0;
-        //assign dbg_implemented [n] = 'h0;
-        //assign dbg_data        [n] = 'h0;
+        // assign dbg_cc          [n] = 'h0;
+        // assign dbg_enabled     [n] = 'h0;
+        // assign dbg_implemented [n] = 'h0;
+        // assign dbg_data        [n] = 'h0;
       end
     end
   endgenerate
@@ -392,7 +392,7 @@ module riscv_du #(
   assign bp_instr_hit  =dbg_instr_break_ena  & ~if_bubble;
   assign bp_branch_hit = dbg_branch_break_ena & ~if_bubble & (if_instr[6:2] == `OPC_BRANCH);
 
-  //Memory access
+  // Memory access
   assign mem_read  = ~|mem_exception & ~mem_bubble & (mem_instr[6:2] == `OPC_LOAD );
   assign mem_write = ~|mem_exception & ~mem_bubble & (mem_instr[6:2] == `OPC_STORE);
 
@@ -414,8 +414,8 @@ module riscv_du #(
             endcase
         end
       end
-      else begin //n >= BREAKPOINTS
-        //assign bp_hit[n] = 1'b0;
+      else begin // n >= BREAKPOINTS
+        // assign bp_hit[n] = 1'b0;
       end
     end
   endgenerate

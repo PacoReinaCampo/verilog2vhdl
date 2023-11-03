@@ -62,13 +62,13 @@ module riscv_id #(
     input      [XLEN          -1:0] bu_nxt_pc,
     input      [XLEN          -1:0] st_nxt_pc,
 
-    //Program counter
+    // Program counter
     input      [XLEN          -1:0] if_pc,
     output reg [XLEN          -1:0] id_pc,
     input      [               1:0] if_bp_predict,
     output reg [               1:0] id_bp_predict,
 
-    //Instruction
+    // Instruction
     input      [ILEN          -1:0] if_instr,
     input                           if_bubble,
     output reg [ILEN          -1:0] id_instr,
@@ -80,14 +80,14 @@ module riscv_id #(
     input      [ILEN          -1:0] wb_instr,
     input                           wb_bubble,
 
-    //Exceptions
+    // Exceptions
     input      [EXCEPTION_SIZE-1:0] if_exception,
     input      [EXCEPTION_SIZE-1:0] ex_exception,
     input      [EXCEPTION_SIZE-1:0] mem_exception,
     input      [EXCEPTION_SIZE-1:0] wb_exception,
     output reg [EXCEPTION_SIZE-1:0] id_exception,
 
-    //From State
+    // From State
     input      [               1:0] st_prv,
     input      [               1:0] st_xlen,
     input                           st_tvm,
@@ -96,11 +96,11 @@ module riscv_id #(
     input      [XLEN          -1:0] st_mcounteren,
     input      [XLEN          -1:0] st_scounteren,
 
-    //To RF
+    // To RF
     output     [               4:0] id_src1,
     output     [               4:0] id_src2,
 
-    //To execution units
+    // To execution units
     output reg [XLEN          -1:0] id_opA,
     output reg [XLEN          -1:0] id_opB,
 
@@ -113,7 +113,7 @@ module riscv_id #(
     output reg                      id_bypwb_opA,
     output reg                      id_bypwb_opB,
 
-    //from MEM/WB
+    // from MEM/WB
     input      [XLEN          -1:0] mem_r,
     input      [XLEN          -1:0] wb_r
 );
@@ -126,11 +126,11 @@ module riscv_id #(
   logic                      multi_cycle_instruction;
   logic                      stall;
 
-  //Immediates
+  // Immediates
   logic [XLEN          -1:0] immI;
   logic [XLEN          -1:0] immU;
 
-  //Opcodes
+  // Opcodes
   logic [               6:2] if_opcode;
   logic [               6:2] id_opcode;
   logic [               6:2] ex_opcode;
@@ -140,9 +140,9 @@ module riscv_id #(
   logic [               2:0] if_func3;
   logic [               6:0] if_func7;
 
-  logic                      xlen;      //Current CPU state XLEN
-  logic                      xlen64;    //Is the CPU state set to RV64?
-  logic                      xlen32;    //Is the CPU state set to RV32?
+  logic                      xlen;      // Current CPU state XLEN
+  logic                      xlen64;    // Is the CPU state set to RV64?
+  logic                      xlen32;    // Is the CPU state set to RV32?
   logic                      has_fpu;
   logic                      has_muldiv;
   logic                      has_amo;
@@ -174,11 +174,11 @@ module riscv_id #(
   // Module Body
   //
 
-  //Program Counter
+  // Program Counter
   always @(posedge clk,negedge rstn) begin
     if      (!rstn                 ) id_pc <= `PC_INIT;
     else if ( st_flush             ) id_pc <= st_nxt_pc;
-    else if ( bu_flush ||  du_flush) id_pc <= bu_nxt_pc; //Is this required?! 
+    else if ( bu_flush ||  du_flush) id_pc <= bu_nxt_pc; // Is this required?! 
     else if (!stall    && !id_stall) id_pc <= if_pc;
   end
 
@@ -201,7 +201,7 @@ module riscv_id #(
     end
   end
 
-  //local stall
+  // local stall
   assign stall     = ex_stall | (du_stall & ~|wb_exception);
   assign id_bubble = stall | bu_flush | st_flush | |ex_exception | |mem_exception | |wb_exception | id_bubble_r;
 
@@ -232,7 +232,7 @@ module riscv_id #(
     if (!stall && !id_stall) id_bp_predict <= if_bp_predict;
   end
 
-  //Exceptions
+  // Exceptions
   always @(posedge clk, negedge rstn) begin
     if      (!rstn                ) id_exception <= 'h0;
     else if ( bu_flush || st_flush) id_exception <= 'h0;
@@ -249,10 +249,10 @@ module riscv_id #(
     end
   end
 
-  //To Register File
+  // To Register File
 
-  //address into register file. Gets registered in memory
-  //Should the hold be handled by the memory?!
+  // address into register file. Gets registered in memory
+  // Should the hold be handled by the memory?!
   assign id_src1 = ~(du_stall || ex_stall) ? if_instr[19:15] : id_instr[19:15];
   assign id_src2 = ~(du_stall || ex_stall) ? if_instr[24:20] : id_instr[24:20];
 
@@ -268,10 +268,10 @@ module riscv_id #(
   assign immI = { {XLEN-11{if_instr[31]}},                             if_instr[30:25],if_instr[24:21],if_instr[20] };
   assign immU = { {XLEN-31{if_instr[31]}},if_instr[30:12],                                                    12'b0 };
 
-  //Create ALU operands
+  // Create ALU operands
 
-  //generate Load-WB-result
-  //result might fall inbetween wb_r and data available in Register File
+  // generate Load-WB-result
+  // result might fall inbetween wb_r and data available in Register File
   always @(*) begin
     casex (wb_opcode)
       `OPC_LOAD     : can_ldwb = ~wb_bubble;
@@ -284,7 +284,7 @@ module riscv_id #(
       `OPC_OP32     : can_ldwb = ~wb_bubble;
       `OPC_JALR     : can_ldwb = ~wb_bubble;
       `OPC_JAL      : can_ldwb = ~wb_bubble;
-      `OPC_SYSTEM   : can_ldwb = ~wb_bubble; //TODO not ALL SYSTEM
+      `OPC_SYSTEM   : can_ldwb = ~wb_bubble; // TODO not ALL SYSTEM
       default       : can_ldwb = 'b0;
     endcase
   end
@@ -397,8 +397,8 @@ module riscv_id #(
           id_opB <= immI;
         end
         `OPC_SYSTEM  : begin
-          id_opA <= wb_r;                        //for CSRxx
-          id_opB <= { {XLEN-5{1'b0}},if_src1 };  //for CSRxxI
+          id_opA <= wb_r;                        // for CSRxx
+          id_opB <= { {XLEN-5{1'b0}},if_src1 };  // for CSRxxI
         end
         default     : begin
           id_opA <= 'hx;
@@ -408,7 +408,7 @@ module riscv_id #(
     end
   end
 
-  //Bypasses
+  // Bypasses
   always @(posedge clk,negedge rstn) begin
     if (!rstn) multi_cycle_instruction <= 1'b0;
     else if (!stall) begin
@@ -431,7 +431,7 @@ module riscv_id #(
     end
   end
 
-  //Check for each stage if the result should be used
+  // Check for each stage if the result should be used
   always @(*) begin
     casex (id_opcode)
       `OPC_LOAD     : can_bypex = ~id_bubble;
@@ -444,7 +444,7 @@ module riscv_id #(
       `OPC_OP32     : can_bypex = ~id_bubble;
       `OPC_JALR     : can_bypex = ~id_bubble;
       `OPC_JAL      : can_bypex = ~id_bubble;
-      `OPC_SYSTEM   : can_bypex = ~id_bubble; //TODO not ALL SYSTEM
+      `OPC_SYSTEM   : can_bypex = ~id_bubble; // TODO not ALL SYSTEM
       default       : can_bypex = 1'b0;
     endcase
   end
@@ -461,7 +461,7 @@ module riscv_id #(
       `OPC_OP32     : can_bypmem = ~ex_bubble & ~multi_cycle_instruction;
       `OPC_JALR     : can_bypmem = ~ex_bubble & ~multi_cycle_instruction;
       `OPC_JAL      : can_bypmem = ~ex_bubble & ~multi_cycle_instruction;
-      `OPC_SYSTEM   : can_bypmem = ~ex_bubble & ~multi_cycle_instruction; //TODO not ALL SYSTEM
+      `OPC_SYSTEM   : can_bypmem = ~ex_bubble & ~multi_cycle_instruction; // TODO not ALL SYSTEM
       default       : can_bypmem = 1'b0;
     endcase
   end
@@ -478,7 +478,7 @@ module riscv_id #(
       `OPC_OP32     : can_bypwb = ~mem_bubble & ~multi_cycle_instruction;
       `OPC_JALR     : can_bypwb = ~mem_bubble & ~multi_cycle_instruction;
       `OPC_JAL      : can_bypwb = ~mem_bubble & ~multi_cycle_instruction;
-      `OPC_SYSTEM   : can_bypwb = ~mem_bubble & ~multi_cycle_instruction; //TODO not ALL SYSTEM
+      `OPC_SYSTEM   : can_bypwb = ~mem_bubble & ~multi_cycle_instruction; // TODO not ALL SYSTEM
       default       : can_bypwb = 1'b0;
     endcase
   end
@@ -596,12 +596,12 @@ module riscv_id #(
     end
   end
 
-  //Generate STALL
+  // Generate STALL
 
-  //rih: todo
+  // rih: todo
   always @(*) begin
-    if      (bu_flush || st_flush || du_flush) id_stall = 'b0;        //flush overrules stall
-    else if (stall                           ) id_stall = ~if_bubble; //ignore NOPs e.g. after flush or IF-stall
+    if      (bu_flush || st_flush || du_flush) id_stall = 'b0;        // flush overrules stall
+    else if (stall                           ) id_stall = ~if_bubble; // ignore NOPs e.g. after flush or IF-stall
     else if (id_opcode == `OPC_LOAD && !id_bubble) begin
       casex (if_opcode)
         `OPC_OP_IMM  : id_stall = (if_src1 == id_dst);
@@ -650,7 +650,7 @@ module riscv_id #(
   else id_stall = 'b0;
 end
 
-  //Generate Illegal Instruction
+  // Generate Illegal Instruction
   always @(*) begin
     casex (if_opcode)
       `OPC_LOAD  : illegal_instr = illegal_lsu_instr;
@@ -659,7 +659,7 @@ end
     endcase
   end
 
-  //ALU
+  // ALU
   always @(*) begin
     casex (if_instr)
       `FENCE  : illegal_alu_instr = 1'b0;
@@ -683,34 +683,34 @@ end
           {1'b?,`BGEU  }: illegal_alu_instr = 1'b0;
           {1'b?,`ADDI  }: illegal_alu_instr = 1'b0;
           {1'b?,`ADD   }: illegal_alu_instr = 1'b0;
-          {1'b0,`ADDIW }: illegal_alu_instr = 1'b0;                 //RV64
-          {1'b0,`ADDW  }: illegal_alu_instr = 1'b0;                 //RV64
+          {1'b0,`ADDIW }: illegal_alu_instr = 1'b0;                 // RV64
+          {1'b0,`ADDW  }: illegal_alu_instr = 1'b0;                 // RV64
           {1'b?,`SUB   }: illegal_alu_instr = 1'b0;
-          {1'b0,`SUBW  }: illegal_alu_instr = 1'b0;                 //RV64
+          {1'b0,`SUBW  }: illegal_alu_instr = 1'b0;                 // RV64
           {1'b?,`XORI  }: illegal_alu_instr = 1'b0;
           {1'b?,`XORX  }: illegal_alu_instr = 1'b0;
           {1'b?,`ORI   }: illegal_alu_instr = 1'b0;
           {1'b?,`ORX   }: illegal_alu_instr = 1'b0;
           {1'b?,`ANDI  }: illegal_alu_instr = 1'b0;
           {1'b?,`ANDX  }: illegal_alu_instr = 1'b0;
-          {1'b?,`SLLI  }: illegal_alu_instr = xlen32 & if_func7[0]; //shamt[5] illegal for RV32
+          {1'b?,`SLLI  }: illegal_alu_instr = xlen32 & if_func7[0]; // shamt[5] illegal for RV32
           {1'b?,`SLLX  }: illegal_alu_instr = 1'b0;
-          {1'b0,`SLLIW }: illegal_alu_instr = 1'b0;                 //RV64
-          {1'b0,`SLLW  }: illegal_alu_instr = 1'b0;                 //RV64
+          {1'b0,`SLLIW }: illegal_alu_instr = 1'b0;                 // RV64
+          {1'b0,`SLLW  }: illegal_alu_instr = 1'b0;                 // RV64
           {1'b?,`SLTI  }: illegal_alu_instr = 1'b0;
           {1'b?,`SLT   }: illegal_alu_instr = 1'b0;
           {1'b?,`SLTIU }: illegal_alu_instr = 1'b0;
           {1'b?,`SLTU  }: illegal_alu_instr = 1'b0;
-          {1'b?,`SRLI  }: illegal_alu_instr = xlen32 & if_func7[0]; //shamt[5] illegal for RV32
+          {1'b?,`SRLI  }: illegal_alu_instr = xlen32 & if_func7[0]; // shamt[5] illegal for RV32
           {1'b?,`SRLX  }: illegal_alu_instr = 1'b0;
-          {1'b0,`SRLIW }: illegal_alu_instr = 1'b0;                 //RV64
-          {1'b0,`SRLW  }: illegal_alu_instr = 1'b0;                 //RV64
-          {1'b?,`SRAI  }: illegal_alu_instr = xlen32 & if_func7[0]; //shamt[5] illegal for RV32
+          {1'b0,`SRLIW }: illegal_alu_instr = 1'b0;                 // RV64
+          {1'b0,`SRLW  }: illegal_alu_instr = 1'b0;                 // RV64
+          {1'b?,`SRAI  }: illegal_alu_instr = xlen32 & if_func7[0]; // shamt[5] illegal for RV32
           {1'b?,`SRAX  }: illegal_alu_instr = 1'b0;
           {1'b0,`SRAIW }: illegal_alu_instr = 1'b0;
           {1'b?,`SRAW  }: illegal_alu_instr = 1'b0;
 
-          //system
+          // system
           {1'b?,`CSRRW }: illegal_alu_instr = illegal_csr_rd |             illegal_csr_wr ;
           {1'b?,`CSRRS }: illegal_alu_instr = illegal_csr_rd | (|if_src1 & illegal_csr_wr);
           {1'b?,`CSRRC }: illegal_alu_instr = illegal_csr_rd | (|if_src1 & illegal_csr_wr);
@@ -723,50 +723,50 @@ end
     endcase
   end
 
-  //LSU
+  // LSU
   always @(*) begin
     casex ( {xlen32,has_amo,if_func7,if_func3,if_opcode} )
       {1'b?,1'b?,`LB    }: illegal_lsu_instr = 1'b0;
       {1'b?,1'b?,`LH    }: illegal_lsu_instr = 1'b0;
       {1'b?,1'b?,`LW    }: illegal_lsu_instr = 1'b0;
-      {1'b0,1'b?,`LD    }: illegal_lsu_instr = 1'b0;  //RV64
+      {1'b0,1'b?,`LD    }: illegal_lsu_instr = 1'b0;  // RV64
       {1'b?,1'b?,`LBU   }: illegal_lsu_instr = 1'b0;
       {1'b?,1'b?,`LHU   }: illegal_lsu_instr = 1'b0;
-      {1'b0,1'b?,`LWU   }: illegal_lsu_instr = 1'b0;  //RV64
+      {1'b0,1'b?,`LWU   }: illegal_lsu_instr = 1'b0;  // RV64
       {1'b?,1'b?,`SB    }: illegal_lsu_instr = 1'b0;
       {1'b?,1'b?,`SH    }: illegal_lsu_instr = 1'b0;
       {1'b?,1'b?,`SW    }: illegal_lsu_instr = 1'b0;
-      {1'b0,1'b?,`SD    }: illegal_lsu_instr = 1'b0;  //RV64
+      {1'b0,1'b?,`SD    }: illegal_lsu_instr = 1'b0;  // RV64
 
-      //AMO
+      // AMO
       default           : illegal_lsu_instr = 1'b1;
     endcase
   end
 
-  //MULDIV
+  // MULDIV
   always @(*) begin
     casex ( {xlen32,if_func7,if_func3,if_opcode} )
       {1'b?,`MUL    }: illegal_muldiv_instr = 1'b0;
       {1'b?,`MULH   }: illegal_muldiv_instr = 1'b0;
-      {1'b0,`MULW   }: illegal_muldiv_instr = 1'b0;  //RV64
+      {1'b0,`MULW   }: illegal_muldiv_instr = 1'b0;  // RV64
       {1'b?,`MULHSU }: illegal_muldiv_instr = 1'b0;
       {1'b?,`MULHU  }: illegal_muldiv_instr = 1'b0;
       {1'b?,`DIV    }: illegal_muldiv_instr = 1'b0;
-      {1'b0,`DIVW   }: illegal_muldiv_instr = 1'b0;  //RV64
+      {1'b0,`DIVW   }: illegal_muldiv_instr = 1'b0;  // RV64
       {1'b?,`DIVU   }: illegal_muldiv_instr = 1'b0;
-      {1'b0,`DIVUW  }: illegal_muldiv_instr = 1'b0;  //RV64
+      {1'b0,`DIVUW  }: illegal_muldiv_instr = 1'b0;  // RV64
       {1'b?,`REM    }: illegal_muldiv_instr = 1'b0;
-      {1'b0,`REMW   }: illegal_muldiv_instr = 1'b0;  //RV64
+      {1'b0,`REMW   }: illegal_muldiv_instr = 1'b0;  // RV64
       {1'b?,`REMU   }: illegal_muldiv_instr = 1'b0;
       {1'b0,`REMUW  }: illegal_muldiv_instr = 1'b0;
       default       : illegal_muldiv_instr = 1'b1;
     endcase
   end
 
-  //Check CSR accesses
+  // Check CSR accesses
   always @(*) begin
     case (if_instr[31:20])
-      //User
+      // User
       `USTATUS   : illegal_csr_rd = ~has_u;
       `UIE       : illegal_csr_rd = ~has_u;
       `UTVEC     : illegal_csr_rd = ~has_u;
@@ -782,7 +782,7 @@ end
                                    (~has_s & st_prv == `PRV_U & ~st_mcounteren[`CY]) |
                                    ( has_s & st_prv == `PRV_S & ~st_mcounteren[`CY]) |
                                    ( has_s & st_prv == `PRV_U &  st_mcounteren[`CY] & st_scounteren[`CY]);
-      `TIMEX     : illegal_csr_rd = 1'b1; //trap on reading TIME. Machine mode must access external timer
+      `TIMEX     : illegal_csr_rd = 1'b1; // trap on reading TIME. Machine mode must access external timer
       `INSTRET   : illegal_csr_rd = ~has_u                                           |
                                    (~has_s & st_prv == `PRV_U & ~st_mcounteren[`IR]) |
                                    ( has_s & st_prv == `PRV_S & ~st_mcounteren[`IR]) |
@@ -791,14 +791,14 @@ end
                                    (~has_s & st_prv == `PRV_U & ~st_mcounteren[`CY]) |
                                    ( has_s & st_prv == `PRV_S & ~st_mcounteren[`CY]) |
                                    ( has_s & st_prv == `PRV_U &  st_mcounteren[`CY] & st_scounteren[`CY]);
-      `TIMEH     : illegal_csr_rd = 1'b1; //trap on reading TIMEH. Machine mode must access external timer
+      `TIMEH     : illegal_csr_rd = 1'b1; // trap on reading TIMEH. Machine mode must access external timer
       `INSTRETH  : illegal_csr_rd = ~has_u | ~xlen32                                 |
                                    (~has_s & st_prv == `PRV_U & ~st_mcounteren[`IR]) |
                                    ( has_s & st_prv == `PRV_S & ~st_mcounteren[`IR]) |
                                    ( has_s & st_prv == `PRV_U &  st_mcounteren[`IR] & st_scounteren[`IR]);
-      //TODO: hpmcounters
+      // TODO: hpmcounters
 
-      //Supervisor
+      // Supervisor
       `SSTATUS   : illegal_csr_rd = ~has_s               | (st_prv < `PRV_S);
       `SEDELEG   : illegal_csr_rd = ~has_s               | (st_prv < `PRV_S);
       `SIDELEG   : illegal_csr_rd = ~has_s               | (st_prv < `PRV_S);
@@ -811,7 +811,7 @@ end
       `SIP       : illegal_csr_rd = ~has_s               | (st_prv < `PRV_S);
       `SATP      : illegal_csr_rd = ~has_s               | (st_prv < `PRV_S) | (st_prv == `PRV_S && st_tvm);
 
-      //Hypervisor
+      // Hypervisor
 /*
       HSTATUS   : illegal_csr_rd = (`HAS_HYPER == 0)               | (st_prv < PRV_H);
       HEDELEG   : illegal_csr_rd = (`HAS_HYPER == 0)               | (st_prv < PRV_H);
@@ -824,7 +824,7 @@ end
       HTVAL     : illegal_csr_rd = (`HAS_HYPER == 0)               | (st_prv < PRV_H);
       HIP       : illegal_csr_rd = (`HAS_HYPER == 0)               | (st_prv < PRV_H);
  */
-      //Machine
+      // Machine
       `MVENDORID : illegal_csr_rd =                        (st_prv < `PRV_M);
       `MARCHID   : illegal_csr_rd =                        (st_prv < `PRV_M);
       `MIMPID    : illegal_csr_rd =                        (st_prv < `PRV_M);
@@ -863,7 +863,7 @@ end
       `PMPADDR15 : illegal_csr_rd =                        (st_prv < `PRV_M);
       `MCYCLE    : illegal_csr_rd =                        (st_prv < `PRV_M); 
       `MINSTRET  : illegal_csr_rd =                        (st_prv < `PRV_M);
-      //TODO: performance counters
+      // TODO: performance counters
       `MCYCLEH   : illegal_csr_rd =          (XLEN > 32) | (st_prv < `PRV_M);
       `MINSTRETH : illegal_csr_rd =          (XLEN > 32) | (st_prv < `PRV_M);
 
@@ -887,11 +887,11 @@ end
       `CYCLE     : illegal_csr_wr = 1'b1; 
       `TIMEX     : illegal_csr_wr = 1'b1;
       `INSTRET   : illegal_csr_wr = 1'b1;
-      //TODO:hpmcounters
+      // TODO:hpmcounters
       `CYCLEH    : illegal_csr_wr = 1'b1;
       `TIMEH     : illegal_csr_wr = 1'b1;
       `INSTRETH  : illegal_csr_wr = 1'b1;
-      //Supervisor
+      // Supervisor
       `SSTATUS   : illegal_csr_wr = ~has_s               | (st_prv < `PRV_S);
       `SEDELEG   : illegal_csr_wr = ~has_s               | (st_prv < `PRV_S);
       `SIDELEG   : illegal_csr_wr = ~has_s               | (st_prv < `PRV_S);
@@ -905,7 +905,7 @@ end
       `SIP       : illegal_csr_wr = ~has_s               | (st_prv < `PRV_S);
       `SATP      : illegal_csr_wr = ~has_s               | (st_prv < `PRV_S)  | (st_prv == `PRV_S && st_tvm);
 
-      //Hypervisor
+      // Hypervisor
 /*
       HSTATUS   : illegal_csr_wr = (`HAS_HYPER == 0)               | (st_prv < PRV_H);
       HEDELEG   : illegal_csr_wr = (`HAS_HYPER == 0)               | (st_prv < PRV_H);
@@ -918,7 +918,7 @@ end
       HBADADDR  : illegal_csr_wr = (`HAS_HYPER == 0)               | (st_prv < PRV_H);
       HIP       : illegal_csr_wr = (`HAS_HYPER == 0)               | (st_prv < PRV_H);
  */
-      //Machine
+      // Machine
       `MVENDORID : illegal_csr_wr = 1'b1;
       `MARCHID   : illegal_csr_wr = 1'b1;
       `MIMPID    : illegal_csr_wr = 1'b1;
@@ -958,7 +958,7 @@ end
       `PMPADDR15 : illegal_csr_wr =                        (st_prv < `PRV_M);
       `MCYCLE    : illegal_csr_wr =                        (st_prv < `PRV_M); 
       `MINSTRET  : illegal_csr_wr =                        (st_prv < `PRV_M);
-      //TODO: performance counters
+      // TODO: performance counters
       `MCYCLEH   : illegal_csr_wr =          (XLEN > 32) | (st_prv < `PRV_M);
       `MINSTRETH : illegal_csr_wr =          (XLEN > 32) | (st_prv < `PRV_M);
 
