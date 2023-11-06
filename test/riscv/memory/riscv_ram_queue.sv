@@ -69,18 +69,16 @@ module riscv_ram_queue #(
   );
 
   //////////////////////////////////////////////////////////////////
-  //
   // Constants
-  //
+  //////////////////////////////////////////////////////////////////////////////
   localparam EMPTY_THRESHOLD = 1;
   localparam FULL_THRESHOLD  = DEPTH - 2;
   localparam ALMOST_EMPTY_THRESHOLD_CHECK = ALMOST_EMPTY_THRESHOLD <= 0     ? EMPTY_THRESHOLD : ALMOST_EMPTY_THRESHOLD + 1;
   localparam ALMOST_FULL_THRESHOLD_CHECK  = ALMOST_FULL_THRESHOLD  >= DEPTH ? FULL_THRESHOLD  : ALMOST_FULL_THRESHOLD - 2;
 
   //////////////////////////////////////////////////////////////////
-  //
   // Variables
-  //
+  //////////////////////////////////////////////////////////////////////////////
   logic [DBITS        -1:0] queue_data[DEPTH];
   logic [$clog2(DEPTH)-1:0] queue_xadr;
   logic [$clog2(DEPTH)-1:0] queue_wadr;
@@ -88,9 +86,8 @@ module riscv_ram_queue #(
   genvar n;
 
   //////////////////////////////////////////////////////////////////
-  //
   // Module Body
-  //
+  //////////////////////////////////////////////////////////////////////////////
 
   // Write Address
   always @(posedge clk_i,negedge rst_ni) begin
