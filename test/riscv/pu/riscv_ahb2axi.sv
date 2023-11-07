@@ -142,9 +142,8 @@ module riscv_ahb2axi #(
   localparam MASK_BITS   = 10 + $clog2(RV_PIC_SIZE);
 
   //////////////////////////////////////////////////////////////////
-  //
   // Types
-  //
+  //////////////////////////////////////////////////////////////////////////////
 
   typedef enum logic [1:0] { IDLE   = 2'b00,    // Nothing in the buffer. No commands yet recieved
                              WR     = 2'b01,    // Write Command recieved

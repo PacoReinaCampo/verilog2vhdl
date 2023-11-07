@@ -116,9 +116,8 @@ module riscv_icache_core #(
   localparam PARCEL_OFF_BITS = $clog2(XLEN / `PARCEL_SIZE);
 
   //////////////////////////////////////////////////////////////////
-  //
   // Functions
-  //
+  //////////////////////////////////////////////////////////////////////////////
   function automatic [XLEN/8-1:0] size2be;
     input [     2:0] size;
     input [XLEN-1:0] adr;

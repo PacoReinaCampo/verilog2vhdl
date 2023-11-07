@@ -79,9 +79,8 @@ module riscv_mul #(
   localparam LATENCY     = `MULT_LATENCY > MAX_LATENCY ? MAX_LATENCY : `MULT_LATENCY;
 
   ////////////////////////////////////////////////////////////////
-  //
-  // functions
-  //
+  // Functions
+  //////////////////////////////////////////////////////////////////////////////
 
   function [XLEN-1:0] sext32;
     input [31:0] operand;
