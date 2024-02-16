@@ -1,0 +1,58 @@
+application
+├── bfm
+│   ├── ahb3
+│   │   └── main.cpp
+│   ├── apb4
+│   │   └── main.cpp
+│   ├── axi4
+│   │   └── main.cpp
+│   ├── bb
+│   │   └── main.cpp
+│   └── wb
+│       └── main.cpp
+├── core
+│   ├── ahb3
+│   │   └── main.cpp
+│   ├── apb4
+│   │   └── main.cpp
+│   ├── axi4
+│   │   └── main.cpp
+│   ├── bb
+│   │   └── main.cpp
+│   └── wb
+│       └── main.cpp
+├── mpsoc
+│   ├── ahb3
+│   │   └── main.cpp
+│   ├── apb4
+│   │   └── main.cpp
+│   ├── axi4
+│   │   └── main.cpp
+│   ├── bb
+│   │   └── main.cpp
+│   └── wb
+│       └── main.cpp
+├── pu
+│   ├── ahb3
+│   │   └── main.cpp
+│   ├── apb4
+│   │   └── main.cpp
+│   ├── axi4
+│   │   └── main.cpp
+│   ├── bb
+│   │   └── main.cpp
+│   └── wb
+│       └── main.cpp
+└── soc
+    ├── ahb3
+    │   └── main.cpp
+    ├── apb4
+    │   └── main.cpp
+    ├── axi4
+    │   └── main.cpp
+    ├── bb
+    │   └── main.cpp
+    └── wb
+        └── main.cpp
+
+30 directories, 25 files
