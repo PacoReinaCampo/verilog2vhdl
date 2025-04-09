@@ -43,7 +43,7 @@
 :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 
 @echo off
-call ../../../../../../../settings64_vivado.bat
+call ../../../../../../../../settings64_vivado.bat
 
 xvlog -sv -prj system.prj -L uvm
 xelab peripheral_uvm_testbench -relax -s top -timescale 1ns/1ps

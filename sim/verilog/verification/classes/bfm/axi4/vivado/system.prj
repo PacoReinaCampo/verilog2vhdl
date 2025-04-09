@@ -42,6 +42,6 @@
 //                                                                               //
 ///////////////////////////////////////////////////////////////////////////////////
 
-sv work ../../../../../../../verification/classes/application/bfm/axi4/peripheral_design.sv
+sv work ../../../../../../../../verification/classes/application/bfm/axi4/peripheral_design.sv
 
-sv work ../../../../../../../verification/classes/library/bfm/axi4/peripheral_testbench.sv
+sv work ../../../../../../../../verification/classes/library/bfm/axi4/peripheral_testbench.sv

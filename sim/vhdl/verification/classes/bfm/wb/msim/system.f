@@ -42,6 +42,6 @@
 ##                                                                               ##
 ###################################################################################
 
-../../../../../../../verification/classes/application/bfm/wb/peripheral_design.sv
+../../../../../../../../verification/classes/application/bfm/wb/peripheral_design.sv
 
-../../../../../../../verification/classes/library/bfm/wb/peripheral_testbench.sv
+../../../../../../../../verification/classes/library/bfm/wb/peripheral_testbench.sv

@@ -42,6 +42,6 @@
 ##                                                                               ##
 ###################################################################################
 
-../../../../../../../verification/classes/application/core/wb/peripheral_design.sv
+../../../../../../../../verification/classes/application/core/wb/peripheral_design.sv
 
-../../../../../../../verification/classes/library/core/wb/peripheral_testbench.sv
+../../../../../../../../verification/classes/library/core/wb/peripheral_testbench.sv

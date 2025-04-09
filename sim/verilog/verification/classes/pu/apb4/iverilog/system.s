@@ -42,6 +42,6 @@
 ##                                                                               ##
 ###################################################################################
 
-../../../../../../../verification/classes/application/pu/apb4/peripheral_design.sv
+../../../../../../../../verification/classes/application/pu/apb4/peripheral_design.sv
 
-../../../../../../../verification/classes/library/pu/apb4/peripheral_testbench.sv
+../../../../../../../../verification/classes/library/pu/apb4/peripheral_testbench.sv

@@ -42,8 +42,8 @@
 ##                                                                               ##
 ###################################################################################
 
-+incdir+../../../../../../../verification/uvm/src
++incdir+../../../../../../../../verification/uvm/src
 
-../../../../../../../verification/uvm/library/pu/ahb3/peripheral_uvm_testbench.sv
+../../../../../../../../verification/uvm/library/pu/ahb3/peripheral_uvm_testbench.sv
 
-../../../../../../../verification/uvm/application/pu/ahb3/peripheral_design.sv
+../../../../../../../../verification/uvm/application/pu/ahb3/peripheral_design.sv

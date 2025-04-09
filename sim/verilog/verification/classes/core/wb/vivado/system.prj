@@ -42,6 +42,6 @@
 //                                                                               //
 ///////////////////////////////////////////////////////////////////////////////////
 
-sv work ../../../../../../../verification/classes/application/core/wb/peripheral_design.sv
+sv work ../../../../../../../../verification/classes/application/core/wb/peripheral_design.sv
 
-sv work ../../../../../../../verification/classes/library/core/wb/peripheral_testbench.sv
+sv work ../../../../../../../../verification/classes/library/core/wb/peripheral_testbench.sv

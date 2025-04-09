@@ -43,10 +43,10 @@
 :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 
 @echo off
-call ../../../../../../settings64_vivado.bat
+call ../../../../../../../settings64_vivado.bat
 
 xvlog -prj mpsoc3d.prj \
--i ../../../../../../soc/rtl/verilog/soc/bootrom
+-i ../../../../../../../soc/rtl/verilog/soc/bootrom
 xelab mpsoc3d_riscv_testbench
 xsim -R mpsoc3d_riscv_testbench
 pause

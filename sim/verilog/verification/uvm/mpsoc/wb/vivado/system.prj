@@ -42,6 +42,6 @@
 //                                                                               //
 ///////////////////////////////////////////////////////////////////////////////////
 
-sv work ../../../../../../../verification/uvm/library/mpsoc/wb/peripheral_uvm_testbench.sv
+sv work ../../../../../../../../verification/uvm/library/mpsoc/wb/peripheral_uvm_testbench.sv
 
-sv work ../../../../../../../verification/uvm/application/mpsoc/wb/peripheral_design.sv
+sv work ../../../../../../../../verification/uvm/application/mpsoc/wb/peripheral_design.sv
