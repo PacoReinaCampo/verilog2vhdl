@@ -36,12 +36,12 @@ verilog2vhdl riscv/pkg/riscv_mpsoc_pkg.sv
 
 verilog2vhdl riscv/pu/riscv_ahb2axi.sv
 verilog2vhdl riscv/pu/riscv_axi2ahb.sv
-verilog2vhdl riscv/pu/riscv_biu2ahb3.sv
+verilog2vhdl riscv/pu/riscv_biu2ahb4.sv
 verilog2vhdl riscv/pu/riscv_biu2axi4.sv
 verilog2vhdl riscv/pu/riscv_biu2wb.sv
-verilog2vhdl riscv/pu/riscv_module_ahb3.sv
+verilog2vhdl riscv/pu/riscv_module_ahb4.sv
 verilog2vhdl riscv/pu/riscv_module_axi4.sv
 verilog2vhdl riscv/pu/riscv_module_wb.sv
-verilog2vhdl riscv/pu/riscv_pu_ahb3.sv
+verilog2vhdl riscv/pu/riscv_pu_ahb4.sv
 verilog2vhdl riscv/pu/riscv_pu_axi4.sv
 verilog2vhdl riscv/pu/riscv_pu_wb.sv

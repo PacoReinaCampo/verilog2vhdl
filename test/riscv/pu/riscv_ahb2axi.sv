@@ -107,20 +107,20 @@ module riscv_ahb2axi #(
     input  wire                       axi4_b_valid,
     output reg                        axi4_b_ready,
 
-    // AHB3 signals
-    input  wire                       ahb3_hsel,
-    input  wire  [AHB_ADDR_WIDTH-1:0] ahb3_haddr,
-    input  wire  [AHB_DATA_WIDTH-1:0] ahb3_hwdata,
-    output reg   [AHB_DATA_WIDTH-1:0] ahb3_hrdata,
-    input  wire                       ahb3_hwrite,
-    input  wire  [               2:0] ahb3_hsize,
-    input  wire  [               2:0] ahb3_hburst,
-    input  wire  [               3:0] ahb3_hprot,
-    input  wire  [               1:0] ahb3_htrans,
-    input  wire                       ahb3_hmastlock,
-    input  wire                       ahb3_hreadyin,
-    output reg                        ahb3_hreadyout,
-    output reg                        ahb3_hresp
+    // AHB4 signals
+    input  wire                       ahb4_hsel,
+    input  wire  [AHB_ADDR_WIDTH-1:0] ahb4_haddr,
+    input  wire  [AHB_DATA_WIDTH-1:0] ahb4_hwdata,
+    output reg   [AHB_DATA_WIDTH-1:0] ahb4_hrdata,
+    input  wire                       ahb4_hwrite,
+    input  wire  [               2:0] ahb4_hsize,
+    input  wire  [               2:0] ahb4_hburst,
+    input  wire  [               3:0] ahb4_hprot,
+    input  wire  [               1:0] ahb4_htrans,
+    input  wire                       ahb4_hmastlock,
+    input  wire                       ahb4_hreadyin,
+    output reg                        ahb4_hreadyout,
+    output reg                        ahb4_hresp
   );
 
   //////////////////////////////////////////////////////////////////
@@ -164,24 +164,24 @@ module riscv_ahb2axi #(
   logic                      buf_read_error_in, buf_read_error;
   logic [AHB_DATA_WIDTH-1:0] buf_rdata;
 
-  logic                      ahb3_hready;
-  logic                      ahb3_hready_q;
-  logic [               1:0] ahb3_htrans_in, ahb3_htrans_q;
-  logic [               2:0] ahb3_hsize_q;
-  logic                      ahb3_hwrite_q;
-  logic [AHB_ADDR_WIDTH-1:0] ahb3_haddr_q;
-  logic [AHB_DATA_WIDTH-1:0] ahb3_hwdata_q;
-  logic                      ahb3_hresp_q;
+  logic                      ahb4_hready;
+  logic                      ahb4_hready_q;
+  logic [               1:0] ahb4_htrans_in, ahb4_htrans_q;
+  logic [               2:0] ahb4_hsize_q;
+  logic                      ahb4_hwrite_q;
+  logic [AHB_ADDR_WIDTH-1:0] ahb4_haddr_q;
+  logic [AHB_DATA_WIDTH-1:0] ahb4_hwdata_q;
+  logic                      ahb4_hresp_q;
 
   // Miscellaneous signals
-  logic                      ahb3_addr_in_dccm, ahb3_addr_in_iccm, ahb3_addr_in_pic;
-  logic                      ahb3_addr_in_dccm_region_nc, ahb3_addr_in_iccm_region_nc, ahb3_addr_in_pic_region_nc;
+  logic                      ahb4_addr_in_dccm, ahb4_addr_in_iccm, ahb4_addr_in_pic;
+  logic                      ahb4_addr_in_dccm_region_nc, ahb4_addr_in_iccm_region_nc, ahb4_addr_in_pic_region_nc;
 
   // signals needed for the read data coming back from the core and to block any further commands as AHB is a blocking bus
   logic                      buf_rdata_en;
 
-  logic                      ahb3_bus_addr_clk_en, buf_rdata_clk_en;
-  logic                      ahb3_clk, ahb3_addr_clk, buf_rdata_clk;
+  logic                      ahb4_bus_addr_clk_en, buf_rdata_clk_en;
+  logic                      ahb4_clk, ahb4_addr_clk, buf_rdata_clk;
 
   // Command buffer is the holding station where we convert to AXI and send to core
   logic                      cmdbuf_wr_en, cmdbuf_rst;
@@ -207,19 +207,19 @@ module riscv_ahb2axi #(
     cmdbuf_wr_en      = 1'b0;  // all clear from the gasket to load the buffer with the command for reads, command/dat for writes
     case (buf_state)
       IDLE: begin  // No commands recieved
-        buf_nxtstate      = ahb3_hwrite ? WR : RD;
-        buf_state_en      = ahb3_hready & ahb3_htrans[1] & ahb3_hsel;  // only transition on a valid hrtans
+        buf_nxtstate      = ahb4_hwrite ? WR : RD;
+        buf_state_en      = ahb4_hready & ahb4_htrans[1] & ahb4_hsel;  // only transition on a valid hrtans
       end
       WR: begin // Write command recieved last cycle
-        buf_nxtstate      = (ahb3_hresp | (ahb3_htrans[1:0] == 2'b0) | ~ahb3_hsel) ? IDLE : (ahb3_hwrite ? WR : RD);
-        buf_state_en      = (~cmdbuf_full | ahb3_hresp) ;
-        cmdbuf_wr_en      = ~cmdbuf_full & ~(ahb3_hresp | ((ahb3_htrans[1:0] == 2'b01) & ahb3_hsel));
+        buf_nxtstate      = (ahb4_hresp | (ahb4_htrans[1:0] == 2'b0) | ~ahb4_hsel) ? IDLE : (ahb4_hwrite ? WR : RD);
+        buf_state_en      = (~cmdbuf_full | ahb4_hresp) ;
+        cmdbuf_wr_en      = ~cmdbuf_full & ~(ahb4_hresp | ((ahb4_htrans[1:0] == 2'b01) & ahb4_hsel));
         // Dont send command to the buffer in case of an error or when the master is not ready with the data now.
       end
       RD: begin // Read command recieved last cycle.
-        buf_nxtstate      = ahb3_hresp ? IDLE :PEND;      // If error go to idle, else wait for read data
-        buf_state_en      = (~cmdbuf_full | ahb3_hresp);  // only when command can go, or if its an error
-        cmdbuf_wr_en      = ~ahb3_hresp & ~cmdbuf_full;   // send command only when no error
+        buf_nxtstate      = ahb4_hresp ? IDLE :PEND;      // If error go to idle, else wait for read data
+        buf_state_en      = (~cmdbuf_full | ahb4_hresp);  // only when command can go, or if its an error
+        cmdbuf_wr_en      = ~ahb4_hresp & ~cmdbuf_full;   // send command only when no error
       end
       PEND: begin // Read Command has been sent. Waiting on Data.
         buf_nxtstate      = IDLE;                              // go back for next command and present data next cycle
@@ -230,40 +230,40 @@ module riscv_ahb2axi #(
     endcase
   end
 
-  always_ff @(posedge ahb3_clk or negedge rst_l) begin
+  always_ff @(posedge ahb4_clk or negedge rst_l) begin
     if (rst_l == 0)
       buf_state <= IDLE;
     else
       buf_state <= buf_state_en ? buf_nxtstate : buf_state;
   end
 
-  assign master_wstrb[7:0]   = ({8{ahb3_hsize_q == 3'b000}} & (8'b0000_0001 << ahb3_haddr_q[2:0])) |
-                               ({8{ahb3_hsize_q == 3'b001}} & (8'b0000_0011 << ahb3_haddr_q[2:0])) |
-                               ({8{ahb3_hsize_q == 3'b010}} & (8'b0000_1111 << ahb3_haddr_q[2:0])) |
-                               ({8{ahb3_hsize_q == 3'b011}} & (8'b1111_1111));
+  assign master_wstrb[7:0]   = ({8{ahb4_hsize_q == 3'b000}} & (8'b0000_0001 << ahb4_haddr_q[2:0])) |
+                               ({8{ahb4_hsize_q == 3'b001}} & (8'b0000_0011 << ahb4_haddr_q[2:0])) |
+                               ({8{ahb4_hsize_q == 3'b010}} & (8'b0000_1111 << ahb4_haddr_q[2:0])) |
+                               ({8{ahb4_hsize_q == 3'b011}} & (8'b1111_1111));
 
   // AHB signals
-  assign ahb3_hreadyout       = ahb3_hresp ? (ahb3_hresp_q & ~ahb3_hready_q) :
+  assign ahb4_hreadyout       = ahb4_hresp ? (ahb4_hresp_q & ~ahb4_hready_q) :
                                 ((~cmdbuf_full | (buf_state == IDLE)) & ~(buf_state == RD | buf_state == PEND)  & ~buf_read_error);
 
-  assign ahb3_hready          = ahb3_hreadyout & ahb3_hreadyin;
-  assign ahb3_htrans_in       = {2{ahb3_hsel}} & ahb3_htrans[1:0];
-  assign ahb3_hrdata          = buf_rdata[63:0];
-  assign ahb3_hresp           = ((ahb3_htrans_q[1:0] != 2'b0) & (buf_state != IDLE)  &
+  assign ahb4_hready          = ahb4_hreadyout & ahb4_hreadyin;
+  assign ahb4_htrans_in       = {2{ahb4_hsel}} & ahb4_htrans[1:0];
+  assign ahb4_hrdata          = buf_rdata[63:0];
+  assign ahb4_hresp           = ((ahb4_htrans_q[1:0] != 2'b0) & (buf_state != IDLE)  &
                                // request not for ICCM or DCCM
-                               ((~(ahb3_addr_in_dccm | ahb3_addr_in_iccm)) |
+                               ((~(ahb4_addr_in_dccm | ahb4_addr_in_iccm)) |
                                // ICCM Rd/Wr OR DCCM Wr not the right size
-                               ((ahb3_addr_in_iccm | (ahb3_addr_in_dccm &  ahb3_hwrite_q)) & ~((ahb3_hsize_q[1:0] == 2'b10) | (ahb3_hsize_q[1:0] == 2'b11))) |
+                               ((ahb4_addr_in_iccm | (ahb4_addr_in_dccm &  ahb4_hwrite_q)) & ~((ahb4_hsize_q[1:0] == 2'b10) | (ahb4_hsize_q[1:0] == 2'b11))) |
                                // HW size but unaligned
-                               ((ahb3_hsize_q == 3'h1) & ahb3_haddr_q[0]) |
+                               ((ahb4_hsize_q == 3'h1) & ahb4_haddr_q[0]) |
                                // W size but unaligned
-                               ((ahb3_hsize_q == 3'h2) & (|ahb3_haddr_q[1:0])) |
+                               ((ahb4_hsize_q == 3'h2) & (|ahb4_haddr_q[1:0])) |
                                // DW size but unaligned
-                               ((ahb3_hsize_q == 3'h3) & (|ahb3_haddr_q[2:0])))) |
+                               ((ahb4_hsize_q == 3'h3) & (|ahb4_haddr_q[2:0])))) |
                                // Read ECC error
                                buf_read_error |
                                // This is for second cycle of hresp protocol
-                               (ahb3_hresp_q & ~ahb3_hready_q);
+                               (ahb4_hresp_q & ~ahb4_hready_q);
 
   // Buffer signals - needed for the read data and ECC error response
   always_ff @(posedge buf_rdata_clk or negedge rst_l) begin
@@ -274,7 +274,7 @@ module riscv_ahb2axi #(
   end
 
   // buf_read_error will be high only one cycle
-  always_ff @(posedge ahb3_clk or negedge rst_l) begin
+  always_ff @(posedge ahb4_clk or negedge rst_l) begin
     if (rst_l == 0)
       buf_read_error <= 0;
     else
@@ -283,96 +283,96 @@ module riscv_ahb2axi #(
 
   // All the Master signals are captured before presenting it to the command buffer.
   // We check for Hresp before sending it to the cmd buffer.
-  always_ff @(posedge ahb3_clk or negedge rst_l) begin
+  always_ff @(posedge ahb4_clk or negedge rst_l) begin
     if (rst_l == 0)
-      ahb3_hresp_q <= 0;
+      ahb4_hresp_q <= 0;
     else
-      ahb3_hresp_q <= ahb3_hresp;
+      ahb4_hresp_q <= ahb4_hresp;
   end
 
-  always_ff @(posedge ahb3_clk or negedge rst_l) begin
+  always_ff @(posedge ahb4_clk or negedge rst_l) begin
     if (rst_l == 0)
-      ahb3_hready_q <= 0;
+      ahb4_hready_q <= 0;
     else
-      ahb3_hready_q <= ahb3_hready;
+      ahb4_hready_q <= ahb4_hready;
   end
 
-  always_ff @(posedge ahb3_clk or negedge rst_l) begin
+  always_ff @(posedge ahb4_clk or negedge rst_l) begin
     if (rst_l == 0)
-      ahb3_htrans_q <= 0;
+      ahb4_htrans_q <= 0;
     else
-      ahb3_htrans_q <= ahb3_htrans_in;
+      ahb4_htrans_q <= ahb4_htrans_in;
   end
 
-  always_ff @(posedge ahb3_addr_clk or negedge rst_l) begin
+  always_ff @(posedge ahb4_addr_clk or negedge rst_l) begin
     if (rst_l == 0)
-      ahb3_hsize_q <= 0;
+      ahb4_hsize_q <= 0;
     else
-      ahb3_hsize_q <= ahb3_hsize;
+      ahb4_hsize_q <= ahb4_hsize;
   end
 
-  always_ff @(posedge ahb3_addr_clk or negedge rst_l) begin
+  always_ff @(posedge ahb4_addr_clk or negedge rst_l) begin
     if (rst_l == 0)
-      ahb3_hwrite_q <= 0;
+      ahb4_hwrite_q <= 0;
     else
-      ahb3_hwrite_q <= ahb3_hwrite;
+      ahb4_hwrite_q <= ahb4_hwrite;
   end
 
-  always_ff @(posedge ahb3_addr_clk or negedge rst_l) begin
+  always_ff @(posedge ahb4_addr_clk or negedge rst_l) begin
     if (rst_l == 0)
-      ahb3_haddr_q <= 0;
+      ahb4_haddr_q <= 0;
     else
-      ahb3_haddr_q <= ahb3_haddr;
+      ahb4_haddr_q <= ahb4_haddr;
   end
 
   // Clock header logic
-  assign ahb3_bus_addr_clk_en = bus_clk_en & (ahb3_hready & ahb3_htrans[1]);
+  assign ahb4_bus_addr_clk_en = bus_clk_en & (ahb4_hready & ahb4_htrans[1]);
   assign buf_rdata_clk_en     = bus_clk_en & buf_rdata_en;
 
   always @(negedge clk) begin
-    ahb3_clk      = clk & (bus_clk_en           | scan_mode);
-    ahb3_addr_clk = clk & (ahb3_bus_addr_clk_en | scan_mode);
+    ahb4_clk      = clk & (bus_clk_en           | scan_mode);
+    ahb4_addr_clk = clk & (ahb4_bus_addr_clk_en | scan_mode);
     buf_rdata_clk = clk & (buf_rdata_clk_en     | scan_mode);
   end
 
   // Address check  dccm
-  assign ahb3_addr_in_dccm_region_nc = (ahb3_haddr_q[AHB_ADDR_WIDTH-1:(AHB_ADDR_WIDTH-REGION_BITS)] == RV_DCCM_SADR[AHB_ADDR_WIDTH-1:(AHB_ADDR_WIDTH-REGION_BITS)]);
+  assign ahb4_addr_in_dccm_region_nc = (ahb4_haddr_q[AHB_ADDR_WIDTH-1:(AHB_ADDR_WIDTH-REGION_BITS)] == RV_DCCM_SADR[AHB_ADDR_WIDTH-1:(AHB_ADDR_WIDTH-REGION_BITS)]);
 
   if (RV_DCCM_SIZE == 48) begin
-    assign ahb3_addr_in_dccm = (ahb3_haddr_q[AHB_ADDR_WIDTH-1:MASK_BITS] == RV_DCCM_SADR[AHB_ADDR_WIDTH-1:MASK_BITS]) & ~(&ahb3_haddr_q[MASK_BITS-1 : MASK_BITS-2]);
+    assign ahb4_addr_in_dccm = (ahb4_haddr_q[AHB_ADDR_WIDTH-1:MASK_BITS] == RV_DCCM_SADR[AHB_ADDR_WIDTH-1:MASK_BITS]) & ~(&ahb4_haddr_q[MASK_BITS-1 : MASK_BITS-2]);
   end
   else begin
-    assign ahb3_addr_in_dccm = (ahb3_haddr_q[AHB_ADDR_WIDTH-1:MASK_BITS] == RV_DCCM_SADR[AHB_ADDR_WIDTH-1:MASK_BITS]);
+    assign ahb4_addr_in_dccm = (ahb4_haddr_q[AHB_ADDR_WIDTH-1:MASK_BITS] == RV_DCCM_SADR[AHB_ADDR_WIDTH-1:MASK_BITS]);
   end
 
   // Address check  iccm
   `ifdef RV_ICCM_ENABLE
-  assign ahb3_addr_in_iccm_region_nc = (ahb3_haddr_q[AHB_ADDR_WIDTH-1:(AHB_ADDR_WIDTH-REGION_BITS)] == RV_ICCM_SADR[AHB_ADDR_WIDTH-1:(AHB_ADDR_WIDTH-REGION_BITS)]);
+  assign ahb4_addr_in_iccm_region_nc = (ahb4_haddr_q[AHB_ADDR_WIDTH-1:(AHB_ADDR_WIDTH-REGION_BITS)] == RV_ICCM_SADR[AHB_ADDR_WIDTH-1:(AHB_ADDR_WIDTH-REGION_BITS)]);
 
   if (RV_ICCM_SIZE == 48) begin
-    assign ahb3_addr_in_iccm = (ahb3_haddr_q[AHB_ADDR_WIDTH-1:MASK_BITS] == RV_ICCM_SADR[AHB_ADDR_WIDTH-1:MASK_BITS]) & ~(&ahb3_haddr_q[MASK_BITS-1 : MASK_BITS-2]);
+    assign ahb4_addr_in_iccm = (ahb4_haddr_q[AHB_ADDR_WIDTH-1:MASK_BITS] == RV_ICCM_SADR[AHB_ADDR_WIDTH-1:MASK_BITS]) & ~(&ahb4_haddr_q[MASK_BITS-1 : MASK_BITS-2]);
   end
   else begin
-    assign ahb3_addr_in_iccm = (ahb3_haddr_q[AHB_ADDR_WIDTH-1:MASK_BITS] == RV_ICCM_SADR[AHB_ADDR_WIDTH-1:MASK_BITS]);
+    assign ahb4_addr_in_iccm = (ahb4_haddr_q[AHB_ADDR_WIDTH-1:MASK_BITS] == RV_ICCM_SADR[AHB_ADDR_WIDTH-1:MASK_BITS]);
   end
   `else
-  assign ahb3_addr_in_iccm = '0;
-  assign ahb3_addr_in_iccm_region_nc = '0;
+  assign ahb4_addr_in_iccm = '0;
+  assign ahb4_addr_in_iccm_region_nc = '0;
   `endif
 
   // PIC memory address check
-  assign ahb3_addr_in_pic_region_nc = (ahb3_haddr_q[AHB_ADDR_WIDTH-1:(AHB_ADDR_WIDTH-REGION_BITS)] == RV_PIC_BASE_ADDR[AHB_ADDR_WIDTH-1:(AHB_ADDR_WIDTH-REGION_BITS)]);
+  assign ahb4_addr_in_pic_region_nc = (ahb4_haddr_q[AHB_ADDR_WIDTH-1:(AHB_ADDR_WIDTH-REGION_BITS)] == RV_PIC_BASE_ADDR[AHB_ADDR_WIDTH-1:(AHB_ADDR_WIDTH-REGION_BITS)]);
 
   if (RV_PIC_SIZE == 48) begin
-    assign ahb3_addr_in_pic = (ahb3_haddr_q[AHB_ADDR_WIDTH-1:MASK_BITS] == RV_PIC_BASE_ADDR[AHB_ADDR_WIDTH-1:MASK_BITS]) & ~(&ahb3_haddr_q[MASK_BITS-1 : MASK_BITS-2]);
+    assign ahb4_addr_in_pic = (ahb4_haddr_q[AHB_ADDR_WIDTH-1:MASK_BITS] == RV_PIC_BASE_ADDR[AHB_ADDR_WIDTH-1:MASK_BITS]) & ~(&ahb4_haddr_q[MASK_BITS-1 : MASK_BITS-2]);
   end
   else begin
-    assign ahb3_addr_in_pic = (ahb3_haddr_q[AHB_ADDR_WIDTH-1:MASK_BITS] == RV_PIC_BASE_ADDR[AHB_ADDR_WIDTH-1:MASK_BITS]);
+    assign ahb4_addr_in_pic = (ahb4_haddr_q[AHB_ADDR_WIDTH-1:MASK_BITS] == RV_PIC_BASE_ADDR[AHB_ADDR_WIDTH-1:MASK_BITS]);
   end
 
   // Command Buffer
   // Holding for the commands to be sent for the AXI. It will be converted to the AXI signals.
-  assign cmdbuf_rst         = (((axi4_aw_valid & axi4_aw_ready) | (axi4_ar_valid & axi4_ar_ready)) & ~cmdbuf_wr_en) | (ahb3_hresp & ~cmdbuf_write);
+  assign cmdbuf_rst         = (((axi4_aw_valid & axi4_aw_ready) | (axi4_ar_valid & axi4_ar_ready)) & ~cmdbuf_wr_en) | (ahb4_hresp & ~cmdbuf_write);
   assign cmdbuf_full        = (cmdbuf_vld & ~((axi4_aw_valid & axi4_aw_ready) | (axi4_ar_valid & axi4_ar_ready)));
 
   always_ff @(posedge bus_clk or negedge rst_l) begin
@@ -386,14 +386,14 @@ module riscv_ahb2axi #(
     if (rst_l == 0)
       cmdbuf_write <= 0;
     else
-      cmdbuf_write <= cmdbuf_wr_en ? ahb3_hwrite_q : cmdbuf_write;
+      cmdbuf_write <= cmdbuf_wr_en ? ahb4_hwrite_q : cmdbuf_write;
   end
 
   always_ff @(posedge bus_clk or negedge rst_l) begin
     if (rst_l == 0)
       cmdbuf_size <= 0;
     else
-      cmdbuf_size <= cmdbuf_wr_en ? ahb3_hsize_q[1:0] : cmdbuf_size;
+      cmdbuf_size <= cmdbuf_wr_en ? ahb4_hsize_q[1:0] : cmdbuf_size;
   end
 
   always_ff @(posedge bus_clk or negedge rst_l) begin
@@ -407,14 +407,14 @@ module riscv_ahb2axi #(
     if (rst_l == 0)
       cmdbuf_addr <= 0;
     else
-      cmdbuf_addr <= cmdbuf_wr_en ? ahb3_haddr_q : cmdbuf_addr;
+      cmdbuf_addr <= cmdbuf_wr_en ? ahb4_haddr_q : cmdbuf_addr;
   end
 
   always_ff @(posedge bus_clk or negedge rst_l) begin
     if (rst_l == 0)
       cmdbuf_wdata <= 0;
     else
-      cmdbuf_wdata <= cmdbuf_wr_en ? ahb3_hwdata : cmdbuf_wdata;
+      cmdbuf_wdata <= cmdbuf_wr_en ? ahb4_hwdata : cmdbuf_wdata;
   end
 
   // AXI Write Command Channel

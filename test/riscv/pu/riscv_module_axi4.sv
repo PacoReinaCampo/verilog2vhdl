@@ -42,7 +42,7 @@
 
 `include "riscv_mpsoc_pkg.sv"
 
-module riscv_module_ahb3 #(
+module riscv_module_ahb4 #(
   parameter            AXI_ID_WIDTH       = 10,
   parameter            AXI_ADDR_WIDTH     = 64,
   parameter            AXI_DATA_WIDTH     = 64,
@@ -234,7 +234,7 @@ module riscv_module_ahb3 #(
   //////////////////////////////////////////////////////////////////////////////
 
   // Instantiate RISC-V PU
-  riscv_pu_ahb3 #(
+  riscv_pu_ahb4 #(
     .XLEN               (XLEN),
     .PLEN               (PLEN),
     .PC_INIT            (PC_INIT),

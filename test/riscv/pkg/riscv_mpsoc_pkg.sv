@@ -623,7 +623,7 @@
   `define AMO_TYPE_LOGICAL    2'h2
   `define AMO_TYPE_ARITHMETIC 2'h3
 
-  // AHB3 Package
+  // AHB4 Package
 
   // HTRANS
   `define HTRANS_IDLE   2'b00

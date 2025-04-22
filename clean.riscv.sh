@@ -36,12 +36,12 @@ rm -rf test/riscv/pkg/riscv_mpsoc_pkg.vhd
 
 rm -rf test/riscv/pu/riscv_ahb2axi.vhd
 rm -rf test/riscv/pu/riscv_axi2ahb.vhd
-rm -rf test/riscv/pu/riscv_biu2ahb3.vhd
+rm -rf test/riscv/pu/riscv_biu2ahb4.vhd
 rm -rf test/riscv/pu/riscv_biu2axi4.vhd
 rm -rf test/riscv/pu/riscv_biu2wb.vhd
-rm -rf test/riscv/pu/riscv_module_ahb3.vhd
+rm -rf test/riscv/pu/riscv_module_ahb4.vhd
 rm -rf test/riscv/pu/riscv_module_axi4.vhd
 rm -rf test/riscv/pu/riscv_module_wb.vhd
-rm -rf test/riscv/pu/riscv_pu_ahb3.vhd
+rm -rf test/riscv/pu/riscv_pu_ahb4.vhd
 rm -rf test/riscv/pu/riscv_pu_axi4.vhd
 rm -rf test/riscv/pu/riscv_pu_wb.vhd
