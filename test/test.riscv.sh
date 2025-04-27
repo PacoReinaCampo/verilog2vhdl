@@ -18,13 +18,13 @@ verilog2vhdl riscv/core/memory/riscv_mmu.sv
 verilog2vhdl riscv/core/memory/riscv_mux.sv
 verilog2vhdl riscv/core/memory/riscv_pmachk.sv
 verilog2vhdl riscv/core/memory/riscv_pmpchk.sv
-verilog2vhdl riscv/core/riscv_bp.sv
-verilog2vhdl riscv/core/riscv_core.sv
-verilog2vhdl riscv/core/riscv_du.sv
-verilog2vhdl riscv/core/riscv_memory.sv
-verilog2vhdl riscv/core/riscv_rf.sv
-verilog2vhdl riscv/core/riscv_state.sv
-verilog2vhdl riscv/core/riscv_wb.sv
+verilog2vhdl riscv/core/main/riscv_bp.sv
+verilog2vhdl riscv/core/main/riscv_core.sv
+verilog2vhdl riscv/core/main/riscv_du.sv
+verilog2vhdl riscv/core/main/riscv_memory.sv
+verilog2vhdl riscv/core/main/riscv_rf.sv
+verilog2vhdl riscv/core/main/riscv_state.sv
+verilog2vhdl riscv/core/main/riscv_wb.sv
 
 verilog2vhdl riscv/memory/riscv_ram_1r1w_generic.sv
 verilog2vhdl riscv/memory/riscv_ram_1r1w.sv
