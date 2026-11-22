@@ -33,20 +33,20 @@
 
 | **Exception**            | **Priority**        | **Epcr (No Delay Slot)**                       | **Epcr (Delay Slot)**                                                      | **Eear**                       |
 |:-------------------------|:--------------------|:-----------------------------------------------|:---------------------------------------------------------------------------|:-------------------------------|
-| `Reset`                  | `1`                 | `-`                                            | `-`                                                                        | `-`                            |
+| `Reset`                  | `1`                 | `none`                                         | `none`                                                                     | `none`                         |
 | `Bus Error`              | `4 (insn) 9 (data)` | `Address of instruction that caused exception` | `Address of jump instruction before the instruction that caused exception` | `Load/store/fetch virtual EA`  |
 | `Data Page Fault`        | `8`                 | `Address of instruction that caused exception` | `Address of jump instruction before the instruction that caused exception` | `Load/store virtual EA`        |
 | `Instruction Page Fault` | `3`                 | `Address of instruction that caused exception` | `Address of jump instruction before the instruction that caused exception` | `Instruction fetch virtual EA` |
-| `Tick Timer`             | `12`                | `Address of next not executed instruction`     | `Address of just executed jump instruction`                                | `-`                            |
+| `Tick Timer`             | `12`                | `Address of next not executed instruction`     | `Address of just executed jump instruction`                                | `none`                         |
 | `Alignment`              | `6`                 | `Address of instruction that caused exception` | `Address of jump instruction before the instruction that caused exception` | `Load/store virtual EA`        |
 | `Illegal Instruction`    | `5`                 | `Address of instruction that caused exception` | `Address of jump instruction before the instruction that caused exception` | `Instruction fetch virtual EA` |
-| `External Interrupt`     | `12`                | `Address of next not executed instruction`     | `Address of just executed jump instruction`                                | `-`                            |
+| `External Interrupt`     | `12`                | `Address of next not executed instruction`     | `Address of just executed jump instruction`                                | `none`                         |
 | `D-TLB Miss`             | `7`                 | `Address of instruction that caused exception` | `Address of jump instruction before the instruction that caused exception` | `Load/store virtual EA`        |
 | `I-TLB Miss`             | `2`                 | `Address of instruction that caused exception` | `Address of jump instruction before the instruction that caused exception` | `Instruction fetch virtual EA` |
-| `Range`                  | `10`                | `Address of instruction that caused exception` | `Address of jump instruction before the instruction that caused exception` | `-`                            |
-| `System Call`            | `7`                 | `Address of next not executed instruction`     | `Address of just executed jump instruction`                                | `-`                            |
-| `Floating-Point`         | `11`                | `Address of next not executed instruction`     | `Address of just executed jump instruction`                                | `-`                            |
-| `Trap`                   | `7`                 | `Address of instruction that caused exception` | `Address of jump instruction before the instruction that caused exception` | `-`                            |
+| `Range`                  | `10`                | `Address of instruction that caused exception` | `Address of jump instruction before the instruction that caused exception` | `none`                         |
+| `System Call`            | `7`                 | `Address of next not executed instruction`     | `Address of just executed jump instruction`                                | `none`                         |
+| `Floating-Point`         | `11`                | `Address of next not executed instruction`     | `Address of just executed jump instruction`                                | `none`                         |
+| `Trap`                   | `7`                 | `Address of instruction that caused exception` | `Address of jump instruction before the instruction that caused exception` | `none`                         |
 
 : Values of EPCR and EEAR After Exception
 
